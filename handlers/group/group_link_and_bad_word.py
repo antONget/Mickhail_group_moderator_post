@@ -18,8 +18,8 @@ router = Router()
 async def check_messages(message: Message, bot: Bot):
     logging.info(f'check_messages {message.message_thread_id} {message.chat.id}')
     text = message.text
+    text_ = text.lower().split()
     if not text:
-        await message.delete()
         return
     await rq.check_chat_user(message)  # Проверяем если ли юзер в БД, если нет добавляем его
 
@@ -36,7 +36,7 @@ async def check_messages(message: Message, bot: Bot):
     else:
         for banned_message in banned_messages:
             # Если в сообщении от пользователя есть запрещенное слово
-            if banned_message.lower().replace(' ', '') in text.lower().replace(' ', ''):
+            if banned_message.lower().replace(' ', '') in text_:
                 await message.delete()
                 # Добавляем нарушение
                 await rq.add_chat_action(user_id=message.from_user.id,

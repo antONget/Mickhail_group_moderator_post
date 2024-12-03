@@ -225,7 +225,7 @@ async def check_violations(message: Message, bot: Bot):
                                             f'на {config.tg_bot.mute_by_bad_word_time} часов.\n'
                                             f'📩Причина: Плохие слова в чате.')
             else:
-                return await message.answer(f'🔍 Замечено плохое слово\n'
+                return await message.answer(f'🔍 Замечено плохое слово - {message.text}\n'
                                             f'👤 Его написал {message.from_user.full_name}\n'
                                             f'🤬 Предупреждение № {count_bad_words}\n')
     elif type == 'ads':
@@ -391,3 +391,9 @@ async def get_group_topic(type_group: str):
     logging.info(f'get_group_topic')
     async with async_session() as session:
         return await session.scalar(select(Group).where(Group.type_group == type_group))
+
+
+async def get_groups():
+    logging.info(f'get_groups')
+    async with async_session() as session:
+        return await session.scalars(select(Group))

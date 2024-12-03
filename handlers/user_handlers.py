@@ -34,7 +34,7 @@ async def process_press_start(message: Message, bot: Bot) -> None:
         username = 'USER'
     data_user = {'tg_id': message.from_user.id, 'username': username}
     await rq.add_user(data=data_user)
-    if check_manager(telegram_id=message.from_user.id) or check_super_admin(telegram_id=message.from_user.id):
+    if await check_manager(telegram_id=message.from_user.id) or await check_super_admin(telegram_id=message.from_user.id):
         await message.answer(text='Добро пожаловать! Этот бот для постинга ваших рекламных сообщений в группу.'
                                   ' Для публикации рекламы выберите раздел',
                              reply_markup=kb.keyboard_main_manager())
@@ -70,6 +70,10 @@ async def process_advertisement(message: Message, bot: Bot, state: FSMContext):
 @error_handler
 async def get_description(message: Message, bot: Bot, state: FSMContext):
     logging.info('get_description')
+    if message.text in ['Частное объявление', 'Коммерческое объявление', 'Услуги', 'Заявки']:
+        await state.set_state(state=None)
+        await message.answer('Отправка была прервана...')
+        return
     await state.update_data(description=message.text)
     await message.answer(text='Пришлите фотоматериалы 📸.')
     await state.set_state(User.photo)
@@ -119,6 +123,10 @@ async def get_photo(callback: CallbackQuery, state: FSMContext, bot: Bot):
 @error_handler
 async def get_description(message: Message, bot: Bot, state: FSMContext):
     logging.info('get_description')
+    if message.text in ['Частное объявление', 'Коммерческое объявление', 'Услуги', 'Заявки']:
+        await state.set_state(state=None)
+        await message.answer('Отправка была прервана...')
+        return
     await state.update_data(info=message.text)
     await message.answer(text='Благодарим вас за предоставленные материалы, ваша объявление отправлено на модерацию,'
                               ' ожидайте публикации')

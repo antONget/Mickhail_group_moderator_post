@@ -13,7 +13,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config_data.config import Config, load_config
 from database.requests import info_violations
-from handlers import other_handlers, user_handlers, manager_handlers
+from handlers import other_handlers, user_handlers, manager_handlers, post_attach
 from handlers.group import group_link_and_bad_word, group_mute, group_info, group_rep, service_messages, group_kick_, \
     group_ban, group_unban, group_warn
 from notify_admins import on_startup_notify
@@ -53,6 +53,7 @@ async def main():
                        group_unban.router, group_warn.router, group_link_and_bad_word.router)
     dp.include_router(user_handlers.router)
     dp.include_router(manager_handlers.router)
+    dp.include_router(post_attach.router)
     dp.include_router(other_handlers.router)
 
     # dp.callback_query.middleware(ThrottlingMiddleware())
