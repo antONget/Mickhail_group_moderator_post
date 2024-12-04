@@ -61,9 +61,9 @@ async def check_chat_user(message: Message) -> None:
             if not user:
                 # Пытаемся его добавить
                 await add_chat_user(tg_id=message.reply_to_message.from_user.id,
-                                    first_name=message.reply_to_message.from_user.first_name,
+                                    first_name=message.reply_to_message.from_user.first_name if message.reply_to_message.from_user.first_name else 'first_name',
                                     last_name=message.reply_to_message.from_user.last_name if message.reply_to_message.from_user.last_name else 'last_nmae',
-                                    user_name=message.reply_to_message.from_user.username,
+                                    user_name=message.reply_to_message.from_user.username if message.reply_to_message.from_user.username else 'username',
                                     status='active',
                                     reputation=0,
                                     total_help=0,
