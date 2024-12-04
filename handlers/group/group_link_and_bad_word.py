@@ -16,7 +16,7 @@ router = Router()
 
 @router.message(IsGroup())
 async def check_messages(message: Message, bot: Bot):
-    logging.info(f'check_messages {message.message_thread_id} {message.chat.id}')
+    logging.info(f'check_messages {message.message_thread_id} {message.chat.id} {message.from_user.id}')
     text = message.text
     if text:
         text_ = text.lower().split()
