@@ -19,7 +19,7 @@ async def check_messages(message: Message, bot: Bot):
     logging.info(f'check_messages')
     await rq.check_chat_user(message)  # Проверяем если ли юзер в БД, если нет добавляем его
     if message.html_text == '+rep':
-        if message.reply_to_message:
+        if message.reply_to_message.text:
             if message.reply_to_message.from_user.id == message.from_user.id:
                 await message.reply('🚫 Ты не можешь повысить репутацию сам себе.')
             else:
@@ -43,7 +43,7 @@ async def check_messages(message: Message, bot: Bot):
             await asyncio.sleep(5)
             await msg.delete()
     elif message.html_text == '-rep':
-        if message.reply_to_message:
+        if message.reply_to_message.text:
             if message.reply_to_message.from_user.id == message.from_user.id:
                 await message.reply('🚫 Ты не можешь понижать репутацию сам себе.')
             else:
