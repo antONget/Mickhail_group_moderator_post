@@ -48,6 +48,12 @@ async def process_press_start(message: Message, bot: Bot) -> None:
 @error_handler
 async def process_advertisement(message: Message, bot: Bot, state: FSMContext):
     logging.info('process_advertisement')
+    if message.from_user.username:
+        username = message.from_user.username
+    else:
+        username = 'USER'
+    data_user = {'tg_id': message.from_user.id, 'username': username}
+    await rq.add_user(data=data_user)
     await state.update_data(type_order=message.text)
     await message.answer(text='<b>Пожалуйста ознакомьтесь с правилами размещения объявления.</b>\n'
                               'Разрешается к продаже только свое оборудование новое или бу, но только в'
@@ -161,6 +167,12 @@ async def get_description(message: Message, bot: Bot, state: FSMContext):
 @error_handler
 async def process_services(message: Message, bot: Bot, state: FSMContext):
     logging.info('process_services')
+    if message.from_user.username:
+        username = message.from_user.username
+    else:
+        username = 'USER'
+    data_user = {'tg_id': message.from_user.id, 'username': username}
+    await rq.add_user(data=data_user)
     await message.answer(text='Выберите категорию услуги для размещения',
                          reply_markup=kb.keyboard_services())
 

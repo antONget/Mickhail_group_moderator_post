@@ -7,6 +7,9 @@ from database.models import ChatUser, ChatAction, Group, Order, User
 from sqlalchemy import select
 from aiogram import Bot
 from config_data.config import Config, load_config
+
+from sqlalchemy import desc
+
 config: Config = load_config()
 
 
@@ -73,8 +76,9 @@ async def check_chat_user(message: Message) -> None:
 
             else:
                 if not user.user_name == message.reply_to_message.from_user.username:
-                    user.user_name = message.reply_to_message.from_user.username
-                    await session.commit()
+                    if message.reply_to_message.from_user.username:
+                        user.user_name = message.reply_to_message.from_user.username
+                        await session.commit()
 
     else:
         # Если не удалось получить юзера из БД, то добавляем его
@@ -180,7 +184,7 @@ async def add_total_help(user_id: int):
         await session.commit()
 
 
-async def check_violations(message: Message, bot: Bot):
+async def check_violations(message: Message, bot: Bot, word_bad: str = "***"):
     """
     Действия с нарушениями
     :param message:
@@ -215,47 +219,61 @@ async def check_violations(message: Message, bot: Bot):
     if type == 'bad word':
         if count_bad_words > 0:  # Если количество плохих слов Больше 0
             if count_bad_words >= 5:  # Если количество плохих слов больше или равно 5
-                until_date = datetime.datetime.now() + datetime.timedelta(hours=config.tg_bot.mute_by_bad_word_time)
-                await bot.restrict_chat_member(chat_id=message.chat_id,
-                                               user_id=message.from_user.id,
-                                               permissions=OnlyReadPermissions,
-                                               until_date=until_date)
-                return await message.answer(f'👤{message.from_user.full_name} '
-                                            f'был ограничен в возможности отправлять сообщения '
-                                            f'на {config.tg_bot.mute_by_bad_word_time} часов.\n'
-                                            f'📩Причина: Плохие слова в чате.')
+                until_date = datetime.datetime.now() + datetime.timedelta(hours=int(config.tg_bot.mute_by_bad_word_time))
+                try:
+                    await bot.restrict_chat_member(chat_id=message.chat.id,
+                                                   user_id=message.from_user.id,
+                                                   permissions=OnlyReadPermissions,
+                                                   until_date=until_date)
+                    return await message.answer(f'👤{message.from_user.full_name} '
+                                                f'был ограничен в возможности отправлять сообщения '
+                                                f'на {config.tg_bot.mute_by_bad_word_time} час.\n'
+                                                f'📩Причина: Плохие слова в чате.')
+                except:
+                    await bot.send_message(chat_id=config.tg_bot.support_id,
+                                           text=f'Не удалось заблокироать {message.from_user.id}/{message.from_user.username} по причине плохих слов')
             else:
-                return await message.answer(f'🔍 Замечено плохое слово - {message.text}\n'
+                return await message.answer(f'🔍 Замечено плохое слово - {word_bad}\n'
                                             f'👤 Его написал {message.from_user.full_name}\n'
                                             f'🤬 Предупреждение № {count_bad_words}\n')
     elif type == 'ads':
         if count_advertising > 0:  # Если количество рекламных ссылок больше 0
             if count_advertising >= 3:  # Если количество рекламных ссылок больше 3
                 until_date = datetime.datetime.now() + datetime.timedelta(hours=int(config.tg_bot.mute_by_bad_word_time))
-                await bot.restrict_chat_member(chat_id=message.chat.id,
-                                               user_id=message.from_user.id,
-                                               permissions=OnlyReadPermissions,
-                                               until_date=until_date)
-                return await message.answer(f'👤{message.from_user.full_name} '
-                                            f'был ограничен в возможности отправлять сообщения '
-                                            f'на {config.tg_bot.mute_by_ads_time} часов.\n'
-                                            f'📩Причина: Реклама в чате.')
+                try:
+                    await bot.restrict_chat_member(chat_id=message.chat.id,
+                                                   user_id=message.from_user.id,
+                                                   permissions=OnlyReadPermissions,
+                                                   until_date=until_date)
+
+                    return await message.answer(f'👤{message.from_user.full_name} '
+                                                f'был ограничен в возможности отправлять сообщения '
+                                                f'на {config.tg_bot.mute_by_ads_time} часов.\n'
+                                                f'📩Причина: Реклама в чате.')
+                except:
+                    await bot.send_message(chat_id=config.tg_bot.support_id,
+                                           text=f'Не удалось заблокироать {message.from_user.id}/{message.from_user.username} по причине рекламы')
             else:
                 return await message.answer(f'🔍 Замечена реклама в чате\n'
                                             f'👤 Написал {message.from_user.full_name}\n'
-                                            f'🤬 Предупреждение № {count_bad_words}\n')
+                                            f'🤬 Предупреждение № {count_advertising}\n')
     elif type == 'warn':
         if count_warn > 0:  # Если количество предупреждений больше 0
             if count_warn >= 3:  # Если количество предупреждений больше 3
                 until_date = datetime.datetime.now() + datetime.timedelta(hours=int(config.tg_bot.mute_by_bad_word_time))
-                await bot.restrict_chat_member(chat_id=message.chat.id,
-                                               user_id=message.from_user.id,
-                                               permissions=OnlyReadPermissions,
-                                               until_date=until_date)
-                return await message.answer(f'👤{message.from_user.full_name} '
-                                            f'был ограничен в возможности отправлять сообщения '
-                                            f'на {config.tg_bot.mute_by_ads_time} часов.\n'
-                                            f'📩Причина: предупреждение.')
+                try:
+                    await bot.restrict_chat_member(chat_id=message.chat.id,
+                                                   user_id=message.from_user.id,
+                                                   permissions=OnlyReadPermissions,
+                                                   until_date=until_date)
+
+                    return await message.answer(f'👤{message.from_user.full_name} '
+                                                f'был ограничен в возможности отправлять сообщения '
+                                                f'на {config.tg_bot.mute_by_ads_time} часов.\n'
+                                                f'📩Причина: предупреждение.')
+                except:
+                    await bot.send_message(chat_id=config.tg_bot.support_id,
+                                           text=f'Не удалось заблокироать {message.from_user.id}/{message.from_user.username} по причине предупреждений')
             else:
                 return await message.answer(f'🔍 Вынесено предупреждение\n'
                                             f'👤 Написал {message.from_user.full_name}\n'
@@ -310,6 +328,7 @@ class OrderStatus:
     cancel = "cancel"
     old = "old"
     delete = "delete"
+    error = "error"
 
 
 async def add_order(data: dict) -> None:
@@ -397,3 +416,11 @@ async def get_groups():
     logging.info(f'get_groups')
     async with async_session() as session:
         return await session.scalars(select(Group))
+
+
+async def select_chat_actions_top() -> list[ChatUser]:
+    logging.info(f'select_chat_action')
+    async with async_session() as session:
+        chat_users = await session.scalars(select(ChatUser).order_by(desc(ChatUser.reputation)))
+        list_chat_users = [user for user in chat_users]
+        return list_chat_users

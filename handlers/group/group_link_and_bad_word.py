@@ -6,6 +6,7 @@ from filters.groups_chat import IsGroup
 from config_data.config import banned_messages, words_of_gratitude
 from database import requests as rq
 from config_data.config import Config, load_config
+from handlers.group.word_of_gratitude import word_of_gradit
 
 import logging
 import datetime
@@ -40,34 +41,38 @@ async def check_messages(message: Message, bot: Bot):
             # Если в сообщении от пользователя есть запрещенное слово
             if banned_message.lower().replace(' ', '') in text_:
                 await message.delete()
+                for w in text_:
+                    if banned_message.lower().replace(' ', '') == w:
+                        word = w
                 # Добавляем нарушение
                 await rq.add_chat_action(user_id=message.from_user.id,
                                          type_='bad word')
-                await rq.check_violations(message=message, bot=bot)  # Проверяем наличие нарушений
-                break
+                await rq.check_violations(message=message, bot=bot, word_bad=word)  # Проверяем наличие нарушений
+                return
         # else:
+        await word_of_gradit(message=message, text_=text_)
         # Если кто-то сказал спасибо
-        for word_of_gratitude in words_of_gratitude:
-            if word_of_gratitude.lower().replace(' ', '') in text_:
-                if message.reply_to_message:
-                    if message.reply_to_message.from_user.id == message.from_user.id:
-                        await message.reply('👮‍♂ Даже не пытайся накрутить себе хорошую статистику')
-                    else:
-                        chat_user = await rq.select_chat_user(message.from_user.id)
-                        if chat_user:
-                            if chat_user.last_help_boost <= datetime.datetime.now() - datetime.timedelta(hours=float(config.tg_bot.time_of_help)):
-                                helping_user = await rq.select_chat_user(message.reply_to_message.from_user.id)
-                                chat_user = await rq.select_chat_user(message.from_user.id)
-                                await rq.add_total_help(helping_user.tg_id)
-                                await rq.add_reputation(user_id=helping_user.tg_id)
-                                await rq.add_chat_action(user_id=message.from_user.id,
-                                                         type_='help boost')
-                                await rq.update_last_help_boost(message.from_user.id)
-                                await message.reply(f'👤 {message.reply_to_message.from_user.full_name}'
-                                                    f' ({helping_user.total_help} помощи)\n'
-                                                    f'помог {message.from_user.full_name} ({chat_user.total_help}'
-                                                    f' помощи) и получает +1 в свой рейтинг.')
-                            else:
-                                await message.reply(f'🚫 Вы не можете сказать сказать слова благодарности'
-                                                    f' ещё {str(datetime.datetime.now() + datetime.timedelta(hours=float(config.tg_bot.time_of_help)) - chat_user.last_help_boost).split(".")[0]}')
+        # for word_of_gratitude in words_of_gratitude:
+        #     if word_of_gratitude.lower().replace(' ', '') in text_:
+        #         if message.reply_to_message:
+        #             if message.reply_to_message.from_user.id == message.from_user.id:
+        #                 await message.reply('👮‍♂ Даже не пытайся накрутить себе хорошую статистику')
+        #             else:
+        #                 chat_user = await rq.select_chat_user(message.from_user.id)
+        #                 if chat_user:
+        #                     # if chat_user.last_help_boost <= datetime.datetime.now() - datetime.timedelta(hours=float(config.tg_bot.time_of_help)):
+        #                     helping_user = await rq.select_chat_user(message.reply_to_message.from_user.id)
+        #                     chat_user = await rq.select_chat_user(message.from_user.id)
+        #                     await rq.add_total_help(helping_user.tg_id)
+        #                     await rq.add_reputation(user_id=helping_user.tg_id)
+        #                     await rq.add_chat_action(user_id=message.from_user.id,
+        #                                              type_='help boost')
+        #                     await rq.update_last_help_boost(message.from_user.id)
+        #                     await message.reply(f'👤 {message.reply_to_message.from_user.full_name}'
+        #                                         f' ({helping_user.total_help} помощи)\n'
+        #                                         f'помог {message.from_user.full_name} ({chat_user.total_help}'
+        #                                         f' помощи) и получает +1 в свой рейтинг.')
+        #                     # else:
+        #                     #     await message.reply(f'🚫 Вы не можете сказать сказать слова благодарности'
+        #                     #                         f' ещё {str(datetime.datetime.now() + datetime.timedelta(hours=float(config.tg_bot.time_of_help)) - chat_user.last_help_boost).split(".")[0]}')
 

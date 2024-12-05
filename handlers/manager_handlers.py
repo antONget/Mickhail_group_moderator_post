@@ -28,6 +28,8 @@ class Manager(StatesGroup):
 @error_handler
 async def process_manager(message: Message, bot: Bot) -> None:
     logging.info('process_manager')
+    await message.answer(text=f'<a href="tg://user?id={924103099}">924103099</a>')
+    # получаем количество заявок по категориям
     list_order_create = await rq.select_order_status(status=rq.OrderStatus.create)
     list_order_publish = await rq.select_order_status(status=rq.OrderStatus.publish)
     list_order_cancel = await rq.select_order_status(status=rq.OrderStatus.cancel)
@@ -42,32 +44,51 @@ async def process_manager(message: Message, bot: Bot) -> None:
 
 @router.callback_query(F.data.startswith('order_'))
 @error_handler
-async def get_photo(callback: CallbackQuery, state: FSMContext, bot: Bot):
-    logging.info(f'get_photo {callback.message.chat.id}')
+async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    logging.info(f'manager_oreders {callback.message.chat.id}')
     await bot.delete_message(chat_id=callback.message.chat.id,
                              message_id=callback.message.message_id)
     answer = callback.data.split('_')[-1]
+    # если выбраны созданные заявки
     if answer == 'create':
-        list_order_create = await rq.select_order_status(status=rq.OrderStatus.create)
-        if list_order_create:
-            order = list_order_create[0]
-            caption = f'{order.description}\n\n{order.info}'
-            media_group = []
-            i = 0
-            for photo in order.photo.split(','):
-                i += 1
-                if i == 1:
-                    media_group.append(InputMediaPhoto(media=photo, caption=caption))
-                else:
-                    media_group.append(InputMediaPhoto(media=photo))
-            await callback.message.answer_media_group(media=media_group)
-            user_order: User = await rq.get_user(tg_id=order.create_tg_id)
-            await callback.message.answer(text=f'Получена заявка от <a href="tg://user?id={user_order.username}">{user_order.username}</a> для размещения в разделе: <i>{order.type_order}</i>.\n'
-                                               f'Вы можете отправить пост на публикацию или отменить публикацию заявки'
-                                               f'указав причину отказа',
-                                          reply_markup=kb.keyboard_publish(id_order=order.id))
-        else:
-            await callback.answer(text='Заявок на модерацию для публикации в группах нет', show_alert=True)
+        try:
+            # список созданных заявок
+            list_order_create = await rq.select_order_status(status=rq.OrderStatus.create)
+            # если созданные заявки есть
+            if list_order_create:
+                # получаем первую заявку из списка
+                order = list_order_create[0]
+                # формируем текст поста из описания и контактов
+                caption = f'{order.description}\n\n{order.info}'
+                # собираем фото в медиагруппу
+                media_group = []
+                i = 0
+                for photo in order.photo.split(','):
+                    i += 1
+                    if i == 1:
+                        media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                    else:
+                        media_group.append(InputMediaPhoto(media=photo))
+                # отправляем медиагруппу
+                await callback.message.answer_media_group(media=media_group)
+                # информация о создателе заявки
+                user_order: User = await rq.get_user(tg_id=order.create_tg_id)
+                print(order.create_tg_id)
+                # отправляем информацию о заказчике
+                await callback.message.answer(text=f'Получена заявка от <a href="tg://user?id={user_order.username}">{user_order.username}</a> для размещения в разделе: <i>{order.type_order}</i>.\n'
+                                                   f'Вы можете отправить пост на публикацию или отменить публикацию заявки'
+                                                   f'указав причину отказа',
+                                              reply_markup=kb.keyboard_publish(id_order=order.id))
+            # иначе информируем что заявок нет
+            else:
+                await callback.answer(text='Заявок на модерацию для публикации в группах нет', show_alert=True)
+        except:
+            list_order_create = await rq.select_order_status(status=rq.OrderStatus.create)
+            await rq.update_order_status(order_id=list_order_create[0].id, status=rq.OrderStatus.error)
+            await callback.message.answer(text=f'При выводе заявки №{list_order_create[0].id} возникла проблема')
+            await bot.send_message(chat_id=config.tg_bot.support_id,
+                                   text=f'При выводе заявки №{list_order_create[0].id} возникла проблема\n')
+            await process_manager(message=callback.message, bot=bot)
 
     elif answer == 'publish':
         list_order_publish = await rq.select_order_status(status=rq.OrderStatus.publish)
@@ -115,12 +136,18 @@ async def get_photo(callback: CallbackQuery, state: FSMContext, bot: Bot):
 @error_handler
 async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
     logging.info(f'publish_order {callback.message.chat.id}')
+    # получаем список заявок на размещение
     list_order_create = await rq.select_order_status(status=rq.OrderStatus.create)
     logging.info(list_order_create)
+    # если есть заявки на размещение
     if list_order_create:
+        # обновляем статус заявки
         await rq.update_order_status(order_id=list_order_create[0].id, status=rq.OrderStatus.publish)
+        # получаем информацию о заявке
         order = await rq.select_order_id(order_id=list_order_create[0].id)
+        # формируем текст поста
         caption = f'{order.description}\n\n{order.info}'
+        # формируем медиагруппу
         media_group = []
         i = 0
         for photo in order.photo.split(','):
@@ -132,7 +159,7 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
         group = await rq.get_group_topic(type_group=order.type_order)
         msg = await bot.send_media_group(chat_id=config.tg_bot.general_group,
                                          media=media_group,
-                                         message_thread_id=group.peer_id_test)
+                                         message_thread_id=group.peer_id)
         await rq.update_order_message(order_id=list_order_create[0].id,
                                       message=f'{msg[0].message_id}!{msg[0].chat.id}/{msg[0].message_thread_id}')
         await rq.update_order_datetime(order_id=list_order_create[0].id,
@@ -144,6 +171,7 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
         await bot.send_message(chat_id=order.create_tg_id,
                                text=f'Ваша заявка опубликована в разделе {order.type_order}')
         await recursion_publish(message=callback.message)
+    # иначе информируем что заявок нет
     else:
         await callback.answer(text='Заявок на модерацию для публикации в группах нет', show_alert=True)
 

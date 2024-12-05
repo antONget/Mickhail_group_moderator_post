@@ -1,5 +1,5 @@
 from aiogram import Router, Bot
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 
 from filters.groups_chat import IsGroup
@@ -36,3 +36,28 @@ async def command_info(message: Message, bot: Bot):
                             f'🚑 Всего помощи: {chat_user.total_help}\n'
                             f'🔇 Кол-во мутов: {chat_user.mutes}\n'
                             f'🚫 Кол-во нарушений за последние 30 дней: {count_violations}')
+
+
+@router.message(IsGroup(),
+                Command('info_top', prefix='!'))
+async def command_info_top(message: Message, command: CommandObject, bot: Bot):
+    logging.info(f'command_info_top')
+    if not command.args:
+        top = 10
+    else:
+        top_arg = command.args
+        try:
+            top = int(top_arg)
+        except:
+            await message.answer(text='Некорректно указано число пользователей')
+            return
+    list_users = await rq.select_chat_actions_top()
+    if len(list_users) >= top:
+        text = f'<b>Список TOP - {top}</b>\n\n'
+        i = 0
+        for user in list_users[:top]:
+            i += 1
+            text += f'{i}. <a href="tg://user?id={user.tg_id}">{user.user_name}</a> - {user.reputation}\n'
+        await message.answer(text=text)
+    else:
+        await message.answer(text='Слишком большое число')
