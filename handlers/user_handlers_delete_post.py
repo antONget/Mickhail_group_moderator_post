@@ -28,7 +28,7 @@ async def process_manager(message: Message, bot: Bot) -> None:
                                                                    create_tg_id=message.from_user.id)
     if list_order_publish:
         order = list_order_publish[0]
-        caption = f'{order.description}\n\n{order.info}'
+        caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
         media_group = []
         i = 0
         for photo in order.photo.split(','):
@@ -83,7 +83,7 @@ async def recursion_publish_delete(callback: CallbackQuery):
                                                                    create_tg_id=callback.from_user.id)
     if list_order_publish:
         order = list_order_publish[0]
-        caption = f'{order.description}\n\n{order.info}'
+        caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
         media_group = []
         i = 0
         for photo in order.photo.split(','):

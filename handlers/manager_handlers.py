@@ -58,7 +58,7 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
                 # получаем первую заявку из списка
                 order = list_order_create[0]
                 # формируем текст поста из описания и контактов
-                caption = f'{order.description}\n\n{order.info}'
+                caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
                 # собираем фото в медиагруппу
                 media_group = []
                 i = 0
@@ -93,7 +93,7 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
         list_order_publish = await rq.select_order_status(status=rq.OrderStatus.publish)
         if list_order_publish:
             order = list_order_publish[0]
-            caption = f'{order.description}\n\n{order.info}'
+            caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
             media_group = []
             i = 0
             for photo in order.photo.split(','):
@@ -114,7 +114,7 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
         list_order_cancel = await rq.select_order_status(status=rq.OrderStatus.cancel)
         if list_order_cancel:
             order = list_order_cancel[0]
-            caption = f'{order.description}\n\n{order.info}'
+            caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
             media_group = []
             i = 0
             for photo in order.photo.split(','):
@@ -145,7 +145,7 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
         # получаем информацию о заявке
         order = await rq.select_order_id(order_id=list_order_create[0].id)
         # формируем текст поста
-        caption = f'{order.description}\n\n{order.info}'
+        caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
         # формируем медиагруппу
         media_group = []
         i = 0
@@ -180,7 +180,7 @@ async def recursion_publish(message: Message):
     list_order_create = await rq.select_order_status(status=rq.OrderStatus.create)
     if list_order_create:
         order = list_order_create[0]
-        caption = f'{order.description}\n\n{order.info}'
+        caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
         media_group = []
         i = 0
         for photo in order.photo.split(','):
@@ -261,7 +261,7 @@ async def recursion_publish_delete(callback: CallbackQuery):
     list_order_publish = await rq.select_order_status(status=rq.OrderStatus.publish)
     if list_order_publish:
         order = list_order_publish[0]
-        caption = f'{order.description}\n\n{order.info}'
+        caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
         media_group = []
         i = 0
         for photo in order.photo.split(','):

@@ -22,6 +22,7 @@ class User(StatesGroup):
     description = State()
     photo = State()
     info = State()
+    cost = State()
 
 
 @router.message(CommandStart())
@@ -134,12 +135,34 @@ async def get_description(message: Message, bot: Bot, state: FSMContext):
         await message.answer('Отправка была прервана...')
         return
     await state.update_data(info=message.text)
+    await state.set_state(User.cost)
+    await message.answer(text='Укажите стоимость')
+
+
+@router.message(F.text, StateFilter(User.cost))
+@error_handler
+async def get_description(message: Message, bot: Bot, state: FSMContext):
+    logging.info('get_description')
+    if message.text in ['Частное объявление', 'Коммерческое объявление', 'Услуги', 'Заявки', 'Удалить публикацию']:
+        await state.set_state(state=None)
+        await message.answer('Отправка была прервана...')
+        return
+    if message.text.isdigit():
+        try:
+            cost = int(message.text)
+            await state.update_data(cost=cost)
+        except:
+            await message.answer(text='Некорректно указана стоимость')
+            return
+    else:
+        await message.answer(text='Стоимость должна содержать только цифры')
+        return
     await message.answer(text='Благодарим вас за предоставленные материалы, ваша объявление отправлено на модерацию,'
                               ' ожидайте публикации')
     data = await state.get_data()
     data_order = {'type_order': data['type_order'], 'create_tg_id': message.from_user.id,
                   'description': data['description'], 'photo': ','.join(data['content']),
-                  'info': data['info'], 'status': rq.OrderStatus.create}
+                  'info': data['info'], 'cost': data['cost'], 'status': rq.OrderStatus.create}
     await rq.add_order(data=data_order)
     await send_message_manager(bot=bot, text=f'Пользователь @{message.from_user.username} оставил заявку на размещение'
                                              f'в категории {data["type_order"]}')

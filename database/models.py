@@ -51,6 +51,7 @@ class Order(Base):
     description: Mapped[str] = mapped_column(String)
     photo: Mapped[str] = mapped_column(String)
     info: Mapped[str] = mapped_column(String)
+    cost: Mapped[int] = mapped_column(Integer, default=0)
     chat_message: Mapped[str] = mapped_column(String, default="0")
     time_publish: Mapped[str] = mapped_column(String, default="0")
     status: Mapped[str] = mapped_column(String)
