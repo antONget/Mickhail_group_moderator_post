@@ -27,7 +27,7 @@ async def on_user_join(event: ChatMemberUpdated, bot: Bot):
                             last_help_boost=datetime.datetime.now() - datetime.timedelta(hours=4))
         await bot.send_message(chat_id=config.tg_bot.general_group,
                                text=f'Привет  {event.from_user.full_name},'
-                                    f' почитай <a href="https://t.me/c/1327075982/69073/69075">правила группы<a>!',
+                                    f' почитай <a href="https://t.me/c/1327075982/69073/69075">правила группы</a>!',
                                message_thread_id=67828)
     elif event.new_chat_member.status == 'left':
         await update_status(user_id=event.from_user.id, status='left')
