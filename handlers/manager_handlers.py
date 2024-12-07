@@ -28,7 +28,6 @@ class Manager(StatesGroup):
 @error_handler
 async def process_manager(message: Message, bot: Bot) -> None:
     logging.info('process_manager')
-    await message.answer(text=f'<a href="tg://user?id={924103099}">924103099</a>')
     # получаем количество заявок по категориям
     list_order_create = await rq.select_order_status(status=rq.OrderStatus.create)
     list_order_publish = await rq.select_order_status(status=rq.OrderStatus.publish)
