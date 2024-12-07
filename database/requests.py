@@ -346,6 +346,14 @@ async def select_order_status(status: str) -> list[Order]:
         return list_order
 
 
+async def select_order_status_create_tg_id(status: str, create_tg_id: int) -> list[Order]:
+    logging.info(f'select_order_status_create_tg_id')
+    async with async_session() as session:
+        orders = await session.scalars(select(Order).where(Order.status == status, Order.create_tg_id == create_tg_id))
+        list_order = [order for order in orders]
+        return list_order
+
+
 async def select_order_id(order_id: int) -> Order:
     logging.info(f'select_order_id')
     async with async_session() as session:

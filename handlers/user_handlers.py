@@ -76,7 +76,7 @@ async def process_advertisement(message: Message, bot: Bot, state: FSMContext):
 @error_handler
 async def get_description(message: Message, bot: Bot, state: FSMContext):
     logging.info('get_description')
-    if message.text in ['Частное объявление', 'Коммерческое объявление', 'Услуги', 'Заявки']:
+    if message.text in ['Частное объявление', 'Коммерческое объявление', 'Услуги', 'Заявки', 'Удалить публикацию']:
         await state.set_state(state=None)
         await message.answer('Отправка была прервана...')
         return
@@ -129,7 +129,7 @@ async def get_photo(callback: CallbackQuery, state: FSMContext, bot: Bot):
 @error_handler
 async def get_description(message: Message, bot: Bot, state: FSMContext):
     logging.info('get_description')
-    if message.text in ['Частное объявление', 'Коммерческое объявление', 'Услуги', 'Заявки']:
+    if message.text in ['Частное объявление', 'Коммерческое объявление', 'Услуги', 'Заявки', 'Удалить публикацию']:
         await state.set_state(state=None)
         await message.answer('Отправка была прервана...')
         return
