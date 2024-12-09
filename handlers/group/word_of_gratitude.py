@@ -9,8 +9,8 @@ async def word_of_gradit(message: Message, text_: list):
     text_str = ''.join(text_)
     for word_of_gratitude in words_of_gratitude:
         if word_of_gratitude.lower().replace(' ', '') in text_str:
-            print(f'{message.reply_to_message.text}')
-            if not message.reply_to_message.text:
+            print(f'{bool(message.reply_to_message.text)} {bool(message.reply_to_message.photo)}')
+            if not message.reply_to_message.text and not message.reply_to_message.photo:
                 # await message.answer(
                 #     'Для того чтобы благодарность зачлась пользователю нужно ответить на его сообщение')
                 return
