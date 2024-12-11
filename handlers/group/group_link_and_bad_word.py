@@ -21,8 +21,10 @@ async def check_messages(message: Message, bot: Bot):
     text = message.text
     if text:
         text_ = text.lower().split()
+    if message.caption:
+        text_ = message.caption.lower().split()
     await rq.check_chat_user(message)  # Проверяем если ли юзер в БД, если нет добавляем его
-    if not text:
+    if not text and not message.caption:
         return
 
 
