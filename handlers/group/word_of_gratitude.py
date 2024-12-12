@@ -32,9 +32,9 @@ async def word_of_gradit(message: Message, text_: list):
                                              type_='help boost')
                     await rq.update_last_help_boost(message.from_user.id)
                     await message.reply(f'👤 {message.reply_to_message.from_user.full_name}'
-                                        f' ({helping_user.total_help} помощи)\n'
-                                        f'помог {message.from_user.full_name} ({chat_user.total_help}'
-                                        f' помощи) и получает +1 в свой рейтинг.')
+                                        f' (репутация {helping_user.total_help}) '
+                                        f'помог {message.from_user.full_name}\n'
+                                        f'Заработал +1 к своей репе')
                     # else:
                     #     await message.reply(f'🚫 Вы не можете сказать сказать слова благодарности'
                     #                         f' ещё {str(datetime.datetime.now() + datetime.timedelta(hours=float(config.tg_bot.time_of_help)) - chat_user.last_help_boost).split(".")[0]}')
