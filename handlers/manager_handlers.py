@@ -191,7 +191,7 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
         group = await rq.get_group_topic(type_group=order.type_order)
         msg = await bot.send_media_group(chat_id=config.tg_bot.general_group,
                                          media=media_group,
-                                         message_thread_id=group.peer_id_test)
+                                         message_thread_id=group.peer_id)
         await rq.update_order_message(order_id=list_order_create[0].id,
                                       message=f'{msg[0].message_id}!{msg[0].chat.id}/{msg[0].message_thread_id}')
         await rq.update_order_datetime(order_id=list_order_create[0].id,
