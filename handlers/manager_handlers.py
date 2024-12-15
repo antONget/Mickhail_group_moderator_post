@@ -131,6 +131,7 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
                                                f' опубликовано в разделе <i>{order.type_order}</i> {order.time_publish}.\n'
                                                f'Вы можете удалить пост если с момента публикации прошло менее 48 часов',
                                           reply_markup=kb.keyboard_delete(id_order=order.id))
+            await state.update_data(count_publish=0)
         else:
             await callback.answer(text='Заявок на модерацию для публикации в группах нет', show_alert=True)
     elif answer == 'cancel':
@@ -206,6 +207,10 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
             await bot.delete_message(chat_id=callback.message.chat.id,
                                      message_id=callback.message.message_id - j - 1)
         await callback.message.edit_text(text='Заявка успешна опубликована', reply_markup=None)
+        user_post: User = await rq.get_user(tg_id=order.create_tg_id)
+        await send_message_manager(bot=bot,
+                                   text=f'Объявление от <a href="tg://user?id={user_post.tg_id}">@{user_post.username}</a>'
+                                        f' опубликовано в разделе <i>{order.type_order}</i>.\n')
         await bot.send_message(chat_id=order.create_tg_id,
                                text=f'Ваша заявка опубликована в разделе {order.type_order}')
         await recursion_publish(message=callback.message)
@@ -341,3 +346,10 @@ async def recursion_publish_delete(callback: CallbackQuery):
             reply_markup=kb.keyboard_delete(id_order=order.id))
     else:
         await callback.answer(text='Заявок на модерацию для публикации в группах нет', show_alert=True)
+
+
+@router.callback_query(F.data.startswith('pubcont_'))
+@error_handler
+async def delete_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
+    logging.info(f'delete_order {callback.message.chat.id}')
+    answer = callback.data.split('_')[-1]

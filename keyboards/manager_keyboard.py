@@ -18,5 +18,6 @@ def keyboard_publish(id_order: int) -> InlineKeyboardMarkup:
 
 def keyboard_delete(id_order: int) -> InlineKeyboardMarkup:
     button_1 = InlineKeyboardButton(text=f"Удалить объявление", callback_data=f'delete_{id_order}')
+    button_2 = InlineKeyboardButton(text=f"Следующее", callback_data=f'pubcont_{id_order}')
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[button_1]])
     return keyboard
