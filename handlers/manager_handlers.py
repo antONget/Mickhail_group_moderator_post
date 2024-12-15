@@ -274,6 +274,10 @@ async def reason_cancel_order(message: Message, state: FSMContext, bot: Bot):
                            text=f'Ваша заявка №{order.id} на размещение в разделе {order.type_order}'
                                 f' отменена по причине {reason}')
     await rq.update_order_status(order_id=order.id, status=rq.OrderStatus.cancel)
+    user_post: User = await rq.get_user(tg_id=order.create_tg_id)
+    await send_message_manager(bot=bot,
+                               text=f'Публикация объявления от '
+                                    f'<a href="tg://user?id={user_post.tg_id}">@{user_post.username}</a> отмена.\n')
     await recursion_publish(message=message)
     await state.set_state(state=None)
 
