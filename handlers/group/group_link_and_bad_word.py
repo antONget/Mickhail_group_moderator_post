@@ -1,10 +1,11 @@
 from aiogram import Router, Bot
-from aiogram.types import Message
+from aiogram.types import Message, MessageReactionUpdated
 
 from filters.admin_chat import IsAdminChat
 from filters.groups_chat import IsGroup
 from config_data.config import banned_messages, words_of_gratitude
 from database import requests as rq
+from database.models import MessageId
 from config_data.config import Config, load_config
 from handlers.group.word_of_gratitude import word_of_gradit
 
@@ -18,6 +19,9 @@ router = Router()
 @router.message(IsGroup())
 async def check_messages(message: Message, bot: Bot):
     logging.info(f'check_messages {message.message_thread_id} {message.chat.id} {message.from_user.id}')
+    await rq.update_message_id(tg_id=message.from_user.id,
+                               message_id=message.message_id,
+                               message_thread_id=message.message_thread_id)
     text = message.text
     if text:
         text_ = text.lower().split()
@@ -78,3 +82,40 @@ async def check_messages(message: Message, bot: Bot):
         #                     #     await message.reply(f'🚫 Вы не можете сказать сказать слова благодарности'
         #                     #                         f' ещё {str(datetime.datetime.now() + datetime.timedelta(hours=float(config.tg_bot.time_of_help)) - chat_user.last_help_boost).split(".")[0]}')
 
+
+@router.message(IsGroup())
+@router.message_reaction(IsGroup())
+async def check_messages(message_reaction: MessageReactionUpdated, bot: Bot):
+    if message_reaction.new_reaction:
+        print(message_reaction)
+        if message_reaction.new_reaction[0].emoji == '👍':
+            message_id: MessageId = await rq.select_message_id(message_id=message_reaction.message_id)
+            if message_id:
+                helping_user = await rq.select_chat_user(message_id.tg_id)
+                chat_user = await rq.select_chat_user(message_id.tg_id)
+                await rq.add_total_help(helping_user.tg_id)
+                await rq.add_reputation(user_id=helping_user.tg_id)
+                await rq.add_chat_action(user_id=message_id.tg_id,
+                                         type_='help boost')
+                await rq.update_last_help_boost(message_id.tg_id)
+                await bot.send_message(chat_id=message_reaction.chat.id,
+                                       text=f'👤 Пользователь {chat_user.first_name} {chat_user.last_name}'
+                                            f' (репутация {helping_user.total_help}) '
+                                            f'помог пользователю {message_reaction.user.full_name} и '
+                                            f'заработал +1 к своей репе',
+                                       message_thread_id=message_id.message_thread_id)
+        if message_reaction.new_reaction[0].emoji == '👎':
+            message_id: MessageId = await rq.select_message_id(message_id=message_reaction.message_id)
+            if message_id:
+                helping_user = await rq.select_chat_user(message_id.tg_id)
+                chat_user = await rq.select_chat_user(message_id.tg_id)
+                await rq.update_last_rep_boost(message_id.tg_id)
+                await rq.remove_reputation(message_id.tg_id)
+                await rq.add_chat_action(user_id=message_id.tg_id,
+                                         type_='rep unboost')
+                await bot.send_message(chat_id=message_reaction.chat.id,
+                                       text=f'👤 Пользователь {message_reaction.user.full_name} '
+                                            f'поставил 👎 пользователю {chat_user.first_name} {chat_user.last_name}'
+                                            f' (репутация {helping_user.total_help}) и '
+                                            f'понизил его репу на -1',
+                                       message_thread_id=message_id.message_thread_id)

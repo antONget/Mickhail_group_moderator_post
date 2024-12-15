@@ -1,6 +1,6 @@
 import asyncio
 from aiogram import Router, Bot, F
-from aiogram.types import Message, CallbackQuery, InputMediaPhoto
+from aiogram.types import Message, CallbackQuery, InputMediaPhoto, InputMediaVideo
 from aiogram.fsm.state import StatesGroup, State
 from database import requests as rq
 from keyboards import manager_keyboard as kb
@@ -34,9 +34,17 @@ async def process_manager(message: Message, bot: Bot) -> None:
         for photo in order.photo.split(','):
             i += 1
             if i == 1:
-                media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
             else:
-                media_group.append(InputMediaPhoto(media=photo))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0]))
         await message.answer_media_group(media=media_group)
         await message.answer(
             text=f'Объявление опубликовано в разделе <i>{order.type_order}</i> {order.time_publish}.\n'
@@ -60,6 +68,12 @@ async def delete_order(callback: CallbackQuery, bot: Bot):
         try:
             await bot.delete_message(chat_id=message_chat.split('!')[1].split('/')[0],
                                      message_id=message_chat.split('!')[0])
+            count_content = len(order.photo.split(','))
+            if count_content > 1:
+                for i in range(count_content - 1):
+                    message_id = int(message_chat.split('!')[0]) + 1 + i
+                    await bot.delete_message(chat_id=message_chat.split('!')[1].split('/')[0],
+                                             message_id=message_id)
             await callback.message.edit_text(text='Пост успешно удален',
                                              reply_markup=None)
         except:
@@ -89,9 +103,17 @@ async def recursion_publish_delete(callback: CallbackQuery):
         for photo in order.photo.split(','):
             i += 1
             if i == 1:
-                media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
             else:
-                media_group.append(InputMediaPhoto(media=photo))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0]))
         await callback.message.answer_media_group(media=media_group)
         await callback.message.answer(
             text=f'Объявление опубликовано в разделе <i>{order.type_order}</i> {order.time_publish}.\n'

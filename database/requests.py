@@ -3,7 +3,7 @@ import datetime
 from dataclasses import dataclass
 from aiogram.types import Message, ChatPermissions
 from database.models import async_session
-from database.models import ChatUser, ChatAction, Group, Order, User
+from database.models import ChatUser, ChatAction, Group, Order, User, MessageId
 from sqlalchemy import select
 from aiogram import Bot
 from config_data.config import Config, load_config
@@ -128,6 +128,11 @@ async def count_user_violations(user_id: int, hours: int = 0) -> int:
 
 # Функция обновляет дату последнего поднятия или снятия репутации
 async def update_last_rep_boost(user_id: int) -> None:
+    """
+    Обновление времени действия
+    :param user_id:
+    :return:
+    """
     logging.info(f'update_last_rep_boost')
     async with async_session() as session:
         chatUser = await session.scalar(select(ChatUser).where(ChatUser.tg_id == user_id))
@@ -159,6 +164,11 @@ async def add_reputation(user_id: int):
 
 # Функция, которая добавляет репутацию +rep
 async def remove_reputation(user_id: int):
+    """
+    Уменьшаем на единицу репутацию о пользователя
+    :param user_id:
+    :return:
+    """
     logging.info(f'update_last_rep_boost')
     async with async_session() as session:
         chat_user = await session.scalar(select(ChatUser).where(ChatUser.tg_id == user_id))
@@ -169,6 +179,12 @@ async def remove_reputation(user_id: int):
 
 # Добавляем действие из чата в БД
 async def add_chat_action(user_id: int, type_: str):
+    """
+    Добавляем информацию в таблицу о совершенном действии
+    :param user_id:
+    :param type_:
+    :return:
+    """
     logging.info(f'update_last_rep_boost')
     async with async_session() as session:
         session.add(ChatAction(**{"user_id": user_id, "type": type_, "added": datetime.datetime.now()}))
@@ -432,3 +448,26 @@ async def select_chat_actions_top() -> list[ChatUser]:
         chat_users = await session.scalars(select(ChatUser).order_by(desc(ChatUser.reputation)))
         list_chat_users = [user for user in chat_users]
         return list_chat_users
+
+
+"""MESSAGE_ID"""
+
+
+async def update_message_id(tg_id: int, message_id: int, message_thread_id: int) -> None:
+    logging.info(f'update_message_id')
+    async with async_session() as session:
+        message = await session.scalar(select(MessageId).where(MessageId.tg_id == tg_id))
+        if message:
+            message.message_id = message_id
+            message.message_thread_id = message_thread_id
+            await session.commit()
+        else:
+            data = {'tg_id': tg_id, 'message_id': message_id, 'message_thread_id': message_thread_id}
+            session.add(MessageId(**data))
+            await session.commit()
+
+
+async def select_message_id(message_id: int) -> MessageId:
+    logging.info(f'select_message_id')
+    async with async_session() as session:
+        return await session.scalar(select(MessageId).where(MessageId.message_id == message_id))

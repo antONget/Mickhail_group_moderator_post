@@ -1,7 +1,7 @@
 import asyncio
 import random
 from aiogram import Router, Bot, F
-from aiogram.types import Message, CallbackQuery, InputMediaPhoto
+from aiogram.types import Message, CallbackQuery, InputMediaPhoto, InputMediaVideo
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart, StateFilter
@@ -65,9 +65,17 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
                 for photo in order.photo.split(','):
                     i += 1
                     if i == 1:
-                        media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                        type_content = photo.split('!')[-1]
+                        if type_content == 'p':
+                            media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                        else:
+                            media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
                     else:
-                        media_group.append(InputMediaPhoto(media=photo))
+                        type_content = photo.split('!')[-1]
+                        if type_content == 'p':
+                            media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                        else:
+                            media_group.append(InputMediaVideo(media=photo.split('!')[0]))
                 # отправляем медиагруппу
                 await callback.message.answer_media_group(media=media_group)
                 # информация о создателе заявки
@@ -81,7 +89,8 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
             # иначе информируем что заявок нет
             else:
                 await callback.answer(text='Заявок на модерацию для публикации в группах нет', show_alert=True)
-        except:
+        except Exception as e:
+            logging.info(f'{e}')
             list_order_create = await rq.select_order_status(status=rq.OrderStatus.create)
             await rq.update_order_status(order_id=list_order_create[0].id, status=rq.OrderStatus.error)
             await callback.message.answer(text=f'При выводе заявки №{list_order_create[0].id} возникла проблема')
@@ -99,9 +108,17 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
             for photo in order.photo.split(','):
                 i += 1
                 if i == 1:
-                    media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                    type_content = photo.split('!')[-1]
+                    if type_content == 'p':
+                        media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                    else:
+                        media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
                 else:
-                    media_group.append(InputMediaPhoto(media=photo))
+                    type_content = photo.split('!')[-1]
+                    if type_content == 'p':
+                        media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                    else:
+                        media_group.append(InputMediaVideo(media=photo.split('!')[0]))
             await callback.message.answer_media_group(media=media_group)
             user_order: User = await rq.get_user(tg_id=order.create_tg_id)
             await callback.message.answer(text=f'Объявление от <a href="tg://user?id={user_order.username}">{user_order.username}</a>'
@@ -120,9 +137,17 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
             for photo in order.photo.split(','):
                 i += 1
                 if i == 1:
-                    media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                    type_content = photo.split('!')[-1]
+                    if type_content == 'p':
+                        media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                    else:
+                        media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
                 else:
-                    media_group.append(InputMediaPhoto(media=photo))
+                    type_content = photo.split('!')[-1]
+                    if type_content == 'p':
+                        media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                    else:
+                        media_group.append(InputMediaVideo(media=photo.split('!')[0]))
             await callback.message.answer_media_group(media=media_group)
             user_order: User = await rq.get_user(tg_id=order.create_tg_id)
 
@@ -152,13 +177,21 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
         for photo in order.photo.split(','):
             i += 1
             if i == 1:
-                media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
             else:
-                media_group.append(InputMediaPhoto(media=photo))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0]))
         group = await rq.get_group_topic(type_group=order.type_order)
         msg = await bot.send_media_group(chat_id=config.tg_bot.general_group,
                                          media=media_group,
-                                         message_thread_id=group.peer_id)
+                                         message_thread_id=group.peer_id_test)
         await rq.update_order_message(order_id=list_order_create[0].id,
                                       message=f'{msg[0].message_id}!{msg[0].chat.id}/{msg[0].message_thread_id}')
         await rq.update_order_datetime(order_id=list_order_create[0].id,
@@ -186,9 +219,17 @@ async def recursion_publish(message: Message):
         for photo in order.photo.split(','):
             i += 1
             if i == 1:
-                media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
             else:
-                media_group.append(InputMediaPhoto(media=photo))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0]))
         await message.answer_media_group(media=media_group)
         user_order: User = await rq.get_user(tg_id=order.create_tg_id)
         await message.answer(
@@ -239,6 +280,12 @@ async def delete_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
         try:
             await bot.delete_message(chat_id=message_chat.split('!')[1].split('/')[0],
                                      message_id=message_chat.split('!')[0])
+            count_content = len(order.photo.split(','))
+            if count_content > 1:
+                for i in range(count_content - 1):
+                    message_id = int(message_chat.split('!')[0]) + 1 + i
+                    await bot.delete_message(chat_id=message_chat.split('!')[1].split('/')[0],
+                                             message_id=message_id)
             await callback.message.edit_text(text='Пост успешно удален',
                                              reply_markup=None)
         except:
@@ -267,9 +314,17 @@ async def recursion_publish_delete(callback: CallbackQuery):
         for photo in order.photo.split(','):
             i += 1
             if i == 1:
-                media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
             else:
-                media_group.append(InputMediaPhoto(media=photo))
+                type_content = photo.split('!')[-1]
+                if type_content == 'p':
+                    media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                else:
+                    media_group.append(InputMediaVideo(media=photo.split('!')[0]))
         await callback.message.answer_media_group(media=media_group)
         user_order: User = await rq.get_user(tg_id=order.create_tg_id)
         await callback.message.answer(

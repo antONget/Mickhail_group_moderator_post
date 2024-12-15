@@ -63,6 +63,13 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(100))
 
 
+class MessageId(Base):
+    __tablename__ = 'message_id'
+    tg_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    message_id: Mapped[int] = mapped_column(Integer, default=0)
+    message_thread_id: Mapped[int] = mapped_column(Integer, default=0)
+
+
 async def async_main():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

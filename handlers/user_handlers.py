@@ -4,7 +4,7 @@ from aiogram import Router, Bot, F
 from aiogram.types import Message, CallbackQuery, InputMediaPhoto
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-from aiogram.filters import CommandStart, StateFilter
+from aiogram.filters import CommandStart, StateFilter, or_f
 from filters.admin_filter import check_manager, check_super_admin
 from database import requests as rq
 from keyboards import user_keyboard as kb
@@ -67,7 +67,7 @@ async def process_advertisement(message: Message, bot: Bot, state: FSMContext):
     await message.answer(text='Для размещение вашего объявления в выбранной категории пришлите боту по его запросу'
                               ' последовательно:\n'
                               '1.📝 <u>Описание объявления</u>\n'
-                              '2.📸 <u>Фотоматериал</u>\n'
+                              '2.📸 <u>Фото/Видео материал</u> (не используйте функцию "Отправить без сжатия" для фото)\n'
                               '3.☎️ <u>Контактная информация</u>\n')
     await message.answer(text='Пришлите описание вашего объявления 📝.')
     await state.set_state(User.description)
@@ -82,21 +82,25 @@ async def get_description(message: Message, bot: Bot, state: FSMContext):
         await message.answer('Отправка была прервана...')
         return
     await state.update_data(description=message.text)
-    await message.answer(text='Пришлите фотоматериалы 📸.')
+    await message.answer(text='Пришлите фото/видео материалы 📸/📹.\n'
+                              '(не используйте функцию "Отправить без сжатия" для фото)')
     await state.set_state(User.photo)
     await state.update_data(content=[])
     await state.update_data(count=[])
 
 
-@router.message(StateFilter(User.photo), F.photo)
+@router.message(StateFilter(User.photo), or_f(F.photo, F.video))
 @error_handler
 async def request_content_photo(message: Message, state: FSMContext, bot: Bot):
-    logging.info(f'request_content_photo {message.photo[-1].file_id}')
+    logging.info(f'request_content_photo')
     await asyncio.sleep(random.random())
     data = await state.get_data()
     list_content = data.get('content', [])
     count = data.get('count', [])
-    content = message.photo[-1].file_id
+    if message.photo:
+        content = f'{message.photo[-1].file_id}!p'
+    elif message.video:
+        content = f'{message.video.file_id}!v'
     list_content.append(content)
     count.append(content)
     await state.update_data(content=list_content)
