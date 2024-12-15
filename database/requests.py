@@ -357,7 +357,7 @@ async def add_order(data: dict) -> None:
 async def select_order_status(status: str) -> list[Order]:
     logging.info(f'select_order_status')
     async with async_session() as session:
-        orders = await session.scalars(select(Order).where(Order.status == status))
+        orders = await session.scalars(select(Order).where(Order.status == status).order_by(desc(Order.id)))
         list_order = [order for order in orders]
         return list_order
 

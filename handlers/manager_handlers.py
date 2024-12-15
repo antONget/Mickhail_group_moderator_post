@@ -108,17 +108,23 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
             for photo in order.photo.split(','):
                 i += 1
                 if i == 1:
-                    type_content = photo.split('!')[-1]
-                    if type_content == 'p':
-                        media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                    if len(photo.split('!')) == 2:
+                        media_group.append(InputMediaPhoto(media=photo, caption=caption))
                     else:
-                        media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
+                        type_content = photo.split('!')[-1]
+                        if type_content == 'p':
+                            media_group.append(InputMediaPhoto(media=photo.split('!')[0], caption=caption))
+                        else:
+                            media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
                 else:
-                    type_content = photo.split('!')[-1]
-                    if type_content == 'p':
-                        media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                    if len(photo.split('!')) == 2:
+                        media_group.append(InputMediaPhoto(media=photo, caption=caption))
                     else:
-                        media_group.append(InputMediaVideo(media=photo.split('!')[0]))
+                        type_content = photo.split('!')[-1]
+                        if type_content == 'p':
+                            media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
+                        else:
+                            media_group.append(InputMediaVideo(media=photo.split('!')[0]))
             await callback.message.answer_media_group(media=media_group)
             user_order: User = await rq.get_user(tg_id=order.create_tg_id)
             await callback.message.answer(text=f'Объявление от <a href="tg://user?id={user_order.username}">{user_order.username}</a>'
