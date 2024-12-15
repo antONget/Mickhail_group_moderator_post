@@ -108,7 +108,7 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
             for photo in order.photo.split(','):
                 i += 1
                 if i == 1:
-                    if len(photo.split('!')) == 2:
+                    if '!' not in photo:
                         media_group.append(InputMediaPhoto(media=photo, caption=caption))
                     else:
                         type_content = photo.split('!')[-1]
@@ -117,8 +117,8 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
                         else:
                             media_group.append(InputMediaVideo(media=photo.split('!')[0], caption=caption))
                 else:
-                    if len(photo.split('!')) == 2:
-                        media_group.append(InputMediaPhoto(media=photo, caption=caption))
+                    if '!' not in photo:
+                        media_group.append(InputMediaPhoto(media=photo))
                     else:
                         type_content = photo.split('!')[-1]
                         if type_content == 'p':
