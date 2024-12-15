@@ -270,6 +270,7 @@ async def reason_cancel_order(message: Message, state: FSMContext, bot: Bot):
                                 f' отменена по причине {reason}')
     await rq.update_order_status(order_id=order.id, status=rq.OrderStatus.cancel)
     await recursion_publish(message=message)
+    await state.set_state(state=None)
 
 
 @router.callback_query(F.data.startswith('delete_'))

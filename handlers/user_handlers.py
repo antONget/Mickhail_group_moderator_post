@@ -27,8 +27,9 @@ class User(StatesGroup):
 
 @router.message(CommandStart())
 @error_handler
-async def process_press_start(message: Message, bot: Bot) -> None:
+async def process_press_start(message: Message, state: FSMContext, bot: Bot) -> None:
     logging.info('process_press_start')
+    await state.set_state(state=None)
     if message.from_user.username:
         username = message.from_user.username
     else:
