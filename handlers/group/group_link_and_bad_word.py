@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Router, Bot
 from aiogram.types import Message, MessageReactionUpdated
 
@@ -87,10 +89,12 @@ async def check_messages(message: Message, bot: Bot):
 @router.message_reaction(IsGroup())
 async def check_messages(message_reaction: MessageReactionUpdated, bot: Bot):
     if message_reaction.new_reaction:
-        print(message_reaction)
         if message_reaction.new_reaction[0].emoji == '👍':
             message_id: MessageId = await rq.select_message_id(message_id=message_reaction.message_id)
             if message_id:
+                # если реакция поставлена на свое же сообщение
+                if message_id.tg_id == message_reaction.user.id:
+                    return
                 helping_user = await rq.select_chat_user(message_id.tg_id)
                 chat_user = await rq.select_chat_user(message_id.tg_id)
                 await rq.add_total_help(helping_user.tg_id)
