@@ -21,6 +21,11 @@ router = Router()
 @router.message(IsGroup())
 async def check_messages(message: Message, bot: Bot):
     logging.info(f'check_messages {message.message_thread_id} {message.chat.id} {message.from_user.id}')
+    if message.message_thread_id == 67830:
+        if message.from_user.id != 7727341378:
+            await message.delete()
+            await message.answer(text='В этом разделе можно публиковать посты только через бота @MyderatorGroupsBot.\n'
+                                      'Оставьте вашу заявку в боте, мы ее рассмотрим и опубликуем!')
     await rq.update_message_id(tg_id=message.from_user.id,
                                message_id=message.message_id,
                                message_thread_id=message.message_thread_id)
