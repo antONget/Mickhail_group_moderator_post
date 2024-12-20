@@ -22,10 +22,10 @@ router = Router()
 async def check_messages(message: Message, bot: Bot):
     logging.info(f'check_messages {message.message_thread_id} {message.chat.id} {message.from_user.id}')
     if message.message_thread_id == 67830:
-        if message.from_user.id != 7727341378:
+        if message.from_user.id not in [7727341378, 1492644981, 1572221921, 843554518]:
             await message.delete()
             msg = await message.answer(text='В этом разделе можно публиковать посты только через бота @MyderatorGroupsBot.\n'
-                                      'Оставьте вашу заявку в боте, мы ее рассмотрим и опубликуем!')
+                                            'Оставьте вашу заявку в боте, мы ее рассмотрим и опубликуем!')
             await asyncio.sleep(10)
             await msg.delete()
     await rq.update_message_id(tg_id=message.from_user.id,
