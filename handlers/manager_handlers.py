@@ -173,7 +173,7 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
     # если есть заявки на размещение
     if list_order_create:
         # обновляем статус заявки
-        await rq.update_order_status(order_id=list_order_create[0].id, status=rq.OrderStatus.publish)
+
         # получаем информацию о заявке
         order = await rq.select_order_id(order_id=list_order_create[0].id)
         # формируем текст поста
@@ -198,7 +198,7 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
         group = await rq.get_group_topic(type_group=order.type_order)
         msg = await bot.send_media_group(chat_id=config.tg_bot.general_group,
                                          media=media_group,
-                                         message_thread_id=group.peer_id_test)  # !!!!
+                                         message_thread_id=group.peer_id)  # !!!!
         await rq.update_order_message(order_id=list_order_create[0].id,
                                       message=f'{msg[0].message_id}!{msg[0].chat.id}/{msg[0].message_thread_id}')
         await rq.update_order_datetime(order_id=list_order_create[0].id,
@@ -213,6 +213,7 @@ async def publish_order(callback: CallbackQuery, state: FSMContext, bot: Bot):
                                         f' опубликовано в разделе <i>{order.type_order}</i>.\n')
         await bot.send_message(chat_id=order.create_tg_id,
                                text=f'Ваша заявка опубликована в разделе {order.type_order}')
+        await rq.update_order_status(order_id=list_order_create[0].id, status=rq.OrderStatus.publish)
         await recursion_publish(message=callback.message)
     # иначе информируем что заявок нет
     else:
