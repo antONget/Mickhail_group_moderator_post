@@ -28,6 +28,7 @@ async def process_manager(message: Message, bot: Bot) -> None:
                                                                    create_tg_id=message.from_user.id)
     if list_order_publish:
         order = list_order_publish[0]
+        logging.info(f'Удалить публикацию {order} {message.from_user.id}')
         caption = f'{order.description}\n\n{order.info}\n\nСтоимость: {order.cost} ₽'
         media_group = []
         i = 0
@@ -45,11 +46,20 @@ async def process_manager(message: Message, bot: Bot) -> None:
                     media_group.append(InputMediaPhoto(media=photo.split('!')[0]))
                 else:
                     media_group.append(InputMediaVideo(media=photo.split('!')[0]))
-        await message.answer_media_group(media=media_group)
-        await message.answer(
-            text=f'Объявление опубликовано в разделе <i>{order.type_order}</i> {order.time_publish}.\n'
-                 f'Вы можете удалить пост если с момента публикации прошло менее 48 часов',
-            reply_markup=kb.keyboard_delete(id_order=order.id))
+        try:
+            await message.answer_media_group(media=media_group)
+            await message.answer(
+                text=f'Объявление опубликовано в разделе <i>{order.type_order}</i> {order.time_publish}.\n'
+                     f'Вы можете удалить пост если с момента публикации прошло менее 48 часов',
+                reply_markup=kb.keyboard_delete(id_order=order.id))
+        except:
+            await rq.update_order_status(order_id=order.id, status=rq.OrderStatus.error)
+            await message.answer(
+                text=f'Объявление опубликовано в разделе <i>{order.type_order}</i> {order.time_publish}.\n'
+                     f'При выводе контента возникла проблема\n'
+                     f'{order.description}\n'
+                     f'{order.info}',
+                reply_markup=kb.keyboard_delete(id_order=order.id))
     else:
         await message.answer(text='Опубликованных постов нет')
 
