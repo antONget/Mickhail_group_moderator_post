@@ -110,8 +110,11 @@ async def check_messages(message: Message, bot: Bot):
 @router.message(IsGroup())
 @router.message_reaction(IsGroup())
 async def check_messages(message_reaction: MessageReactionUpdated, bot: Bot):
+    # если новая реакция
     if message_reaction.new_reaction:
+        # проверка, что реакция '👍'
         if message_reaction.new_reaction[0].emoji == '👍':
+            # получаем информацию о сообщении на которое поставили '👍'
             message_id: MessageId = await rq.select_message_id(message_id=message_reaction.message_id)
             if message_id:
                 # если реакция поставлена на свое же сообщение
@@ -124,12 +127,14 @@ async def check_messages(message_reaction: MessageReactionUpdated, bot: Bot):
                 await rq.add_chat_action(user_id=message_id.tg_id,
                                          type_='help boost')
                 await rq.update_last_help_boost(message_id.tg_id)
-                await bot.send_message(chat_id=message_reaction.chat.id,
-                                       text=f'👤 Пользователь {chat_user.first_name} {chat_user.last_name}'
-                                            f' (репутация {helping_user.total_help}) '
-                                            f'помог пользователю {message_reaction.user.full_name} и '
-                                            f'заработал +1 к своей репе',
-                                       message_thread_id=message_id.message_thread_id)
+                msg = await bot.send_message(chat_id=message_reaction.chat.id,
+                                             text=f'👤 Пользователь {chat_user.first_name} {chat_user.last_name}'
+                                                  f' (репутация {helping_user.total_help}) '
+                                                  f'помог пользователю {message_reaction.user.full_name} и '
+                                                  f'заработал +1 к своей репе',
+                                             message_thread_id=message_id.message_thread_id)
+                await asyncio.sleep(20 * 60)
+                await msg.delete()
         if message_reaction.new_reaction[0].emoji == '👎':
             message_id: MessageId = await rq.select_message_id(message_id=message_reaction.message_id)
             if message_id:
@@ -139,9 +144,11 @@ async def check_messages(message_reaction: MessageReactionUpdated, bot: Bot):
                 await rq.remove_reputation(message_id.tg_id)
                 await rq.add_chat_action(user_id=message_id.tg_id,
                                          type_='rep unboost')
-                await bot.send_message(chat_id=message_reaction.chat.id,
-                                       text=f'👤 Пользователь {message_reaction.user.full_name} '
-                                            f'поставил 👎 пользователю {chat_user.first_name} {chat_user.last_name}'
-                                            f' (репутация {helping_user.total_help}) и '
-                                            f'понизил его репу на -1',
-                                       message_thread_id=message_id.message_thread_id)
+                msg = await bot.send_message(chat_id=message_reaction.chat.id,
+                                             text=f'👤 Пользователь {message_reaction.user.full_name} '
+                                                  f'поставил 👎 пользователю {chat_user.first_name} {chat_user.last_name}'
+                                                  f' (репутация {helping_user.total_help}) и '
+                                                  f'понизил его репу на -1',
+                                             message_thread_id=message_id.message_thread_id)
+                await asyncio.sleep(20 * 60)
+                await msg.delete()
