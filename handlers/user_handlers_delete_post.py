@@ -72,30 +72,36 @@ async def delete_order(callback: CallbackQuery, bot: Bot):
     order: Order = await rq.select_order_id(order_id=int(answer))
     date_format = '%d-%m-%Y %H:%M'
     current_date = datetime.now().strftime('%d-%m-%Y %H:%M')
-    delta_time = (datetime.strptime(current_date, date_format) - datetime.strptime(order.time_publish, date_format))
-    if delta_time.days < 2:
-        message_chat = order.chat_message
-        try:
-            await bot.delete_message(chat_id=message_chat.split('!')[1].split('/')[0],
-                                     message_id=message_chat.split('!')[0])
-            count_content = len(order.photo.split(','))
-            if count_content > 1:
-                for i in range(count_content - 1):
-                    message_id = int(message_chat.split('!')[0]) + 1 + i
-                    await bot.delete_message(chat_id=message_chat.split('!')[1].split('/')[0],
-                                             message_id=message_id)
-            await callback.message.edit_text(text='Пост успешно удален',
-                                             reply_markup=None)
-        except:
-            await callback.message.edit_text(text='Пост для удаления в группе не найден,'
-                                                  ' возможно вы удалили его самостоятельно',
-                                             reply_markup=None)
-        await rq.update_order_status(order_id=order.id, status=rq.OrderStatus.delete)
+    if order.time_publish == '0':
+        delta_time = (datetime.strptime(current_date, date_format) - datetime.strptime(order.time_publish, date_format))
+        if delta_time.days < 2:
+            message_chat = order.chat_message
+            try:
+                await bot.delete_message(chat_id=message_chat.split('!')[1].split('/')[0],
+                                         message_id=message_chat.split('!')[0])
+                count_content = len(order.photo.split(','))
+                if count_content > 1:
+                    for i in range(count_content - 1):
+                        message_id = int(message_chat.split('!')[0]) + 1 + i
+                        await bot.delete_message(chat_id=message_chat.split('!')[1].split('/')[0],
+                                                 message_id=message_id)
+                await callback.message.edit_text(text='Пост успешно удален',
+                                                 reply_markup=None)
+            except:
+                await callback.message.edit_text(text='Пост для удаления в группе не найден,'
+                                                      ' возможно вы удалили его самостоятельно',
+                                                 reply_markup=None)
+            await rq.update_order_status(order_id=order.id, status=rq.OrderStatus.delete)
 
+        else:
+            await callback.message.edit_text(text='Пост не может быть удален так как прошло более 48 часов',
+                                             reply_markup=None)
+            await rq.update_order_status(order_id=order.id, status=rq.OrderStatus.old)
+            await asyncio.sleep(1)
     else:
         await callback.message.edit_text(text='Пост не может быть удален так как прошло более 48 часов',
                                          reply_markup=None)
-        await rq.update_order_status(order_id=order.id, status=rq.OrderStatus.old)
+        await rq.update_order_status(order_id=order.id, status=rq.OrderStatus.error)
         await asyncio.sleep(1)
     await recursion_publish_delete(callback=callback)
     await callback.answer()
