@@ -133,7 +133,7 @@ async def check_messages(message_reaction: MessageReactionUpdated, bot: Bot):
                                                   f'помог пользователю {message_reaction.user.full_name} и '
                                                   f'заработал +1 к своей репе',
                                              message_thread_id=message_id.message_thread_id)
-                await asyncio.sleep(20 * 60)
+                await asyncio.sleep(1 * 60)
                 await msg.delete()
         if message_reaction.new_reaction[0].emoji == '👎':
             message_id: MessageId = await rq.select_message_id(message_id=message_reaction.message_id)
@@ -150,5 +150,5 @@ async def check_messages(message_reaction: MessageReactionUpdated, bot: Bot):
                                                   f' (репутация {helping_user.total_help}) и '
                                                   f'понизил его репу на -1',
                                              message_thread_id=message_id.message_thread_id)
-                await asyncio.sleep(20 * 60)
+                await asyncio.sleep(1 * 60)
                 await msg.delete()

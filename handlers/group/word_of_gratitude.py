@@ -40,7 +40,7 @@ async def word_of_gradit(message: Message, text_: list):
                                               f' (репутация {helping_user.total_help}) '
                                               f'помог пользователю {message.from_user.full_name} и '
                                               f'заработал +1 к своей репе')
-                    await asyncio.sleep(20 * 60)
+                    await asyncio.sleep(1 * 60)
                     await msg.delete()
                     # else:
                     #     await message.reply(f'🚫 Вы не можете сказать сказать слова благодарности'
