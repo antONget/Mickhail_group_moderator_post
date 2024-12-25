@@ -456,18 +456,17 @@ async def select_chat_actions_top() -> list[ChatUser]:
 async def update_message_id(tg_id: int, message_id: int, message_thread_id: int) -> None:
     logging.info(f'update_message_id')
     async with async_session() as session:
-        message = await session.scalar(select(MessageId).where(MessageId.tg_id == tg_id))
-        if message:
-            message.message_id = message_id
-            message.message_thread_id = message_thread_id
-            await session.commit()
-        else:
-            data = {'tg_id': tg_id, 'message_id': message_id, 'message_thread_id': message_thread_id}
-            session.add(MessageId(**data))
-            await session.commit()
+        messages = await session.scalars(select(MessageId).where(MessageId.tg_id == tg_id))
+        list_message = [message for message in messages]
+        if len(list_message) > 5:
+            await session.delete(list_message[0])
+        data = {'tg_id': tg_id, 'message_id': message_id, 'message_thread_id': message_thread_id}
+        session.add(MessageId(**data))
+        await session.commit()
 
 
 async def select_message_id(message_id: int) -> MessageId:
     logging.info(f'select_message_id')
     async with async_session() as session:
         return await session.scalar(select(MessageId).where(MessageId.message_id == message_id))
+

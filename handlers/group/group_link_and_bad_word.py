@@ -21,28 +21,43 @@ router = Router()
 @router.message(IsGroup())
 async def check_messages(message: Message, bot: Bot):
     logging.info(f'check_messages {message.message_thread_id} {message.chat.id} {message.from_user.id}')
-    if message.message_thread_id == 67830:
-        orders = await rq.select_order_status(status=rq.OrderStatus.publish)
-        if message.reply_to_message.message_id:
-            message_publish = []
-            for order_message in orders:
-                message_publish.append(int(order_message.chat_message.split('!')[0]))
-            if message.reply_to_message.message_id not in message_publish:
-                await message.delete()
-                msg = await message.answer(
-                    text='В этом разделе можно публиковать посты только через бота @MyderatorGroupsBot.\n'
-                         'Оставьте вашу заявку в боте, мы ее рассмотрим и опубликуем!')
-                await asyncio.sleep(10)
-                await msg.delete()
-                return
-            else:
-                return
-        if message.from_user.id not in [7727341378, 1492644981, 1572221921, 843554518]:
+    if message.message_thread_id == 3: #67830:
+        # orders = await rq.select_order_status(status=rq.OrderStatus.publish)
+        # if not message.reply_to_message:
+        #     # message_publish = []
+        #     # for order_message in orders:
+        #     #     message_publish.append(int(order_message.chat_message.split('!')[0]))
+        #     # if message.reply_to_message.message_id not in message_publish:
+        #     await message.delete()
+        #     msg = await message.answer(
+        #         text='В этом разделе можно публиковать посты только через бота @MyderatorGroupsBot.\n'
+        #              'Оставьте вашу заявку в боте, мы ее рассмотрим и опубликуем!')
+        #     await asyncio.sleep(10)
+        #     await msg.delete()
+        #     return
+
+        if message.reply_to_message.text:
+            pass
+        # else:
+        #     # message_publish = []
+        #     # for order_message in orders:
+        #     #     message_publish.append(int(order_message.chat_message.split('!')[0]))
+        #     # if message.reply_to_message.message_id not in message_publish:
+        #     await message.delete()
+        #     msg = await message.answer(
+        #         text='В этом разделе можно публиковать посты только через бота @MyderatorGroupsBot.\n'
+        #              'Оставьте вашу заявку в боте, мы ее рассмотрим и опубликуем!')
+        #     await asyncio.sleep(10)
+        #     await msg.delete()
+        #     return
+
+        elif message.from_user.id not in [7727341378, 1492644981, 1572221921, 843554518]:
             await message.delete()
             msg = await message.answer(text='В этом разделе можно публиковать посты только через бота @MyderatorGroupsBot.\n'
                                             'Оставьте вашу заявку в боте, мы ее рассмотрим и опубликуем!')
             await asyncio.sleep(10)
             await msg.delete()
+            return
     await rq.update_message_id(tg_id=message.from_user.id,
                                message_id=message.message_id,
                                message_thread_id=message.message_thread_id)

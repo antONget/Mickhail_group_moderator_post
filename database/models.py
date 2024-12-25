@@ -65,7 +65,8 @@ class User(Base):
 
 class MessageId(Base):
     __tablename__ = 'message_id'
-    tg_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id_: Mapped[int] = mapped_column(Integer, primary_key=True)
+    tg_id: Mapped[int] = mapped_column(BigInteger)
     message_id: Mapped[int] = mapped_column(Integer, default=0)
     message_thread_id: Mapped[int] = mapped_column(Integer, default=0)
 
