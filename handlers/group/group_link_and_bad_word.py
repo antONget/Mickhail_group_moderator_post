@@ -21,7 +21,7 @@ router = Router()
 @router.message(IsGroup())
 async def check_messages(message: Message, bot: Bot):
     logging.info(f'check_messages {message.message_thread_id} {message.chat.id} {message.from_user.id}')
-    if message.message_thread_id == 3: #67830:
+    if message.message_thread_id == 67830:
         # orders = await rq.select_order_status(status=rq.OrderStatus.publish)
         # if not message.reply_to_message:
         #     # message_publish = []
