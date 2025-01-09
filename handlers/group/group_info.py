@@ -15,6 +15,13 @@ router = Router()
 @router.message(IsGroup(),
                 Command('info', prefix='!'))
 async def command_info(message: Message, bot: Bot):
+    """
+    Выводит информацию о пользователе вызвавшего команду, если применить команду как ответную то получим информацию
+     о пользователе на чье сообщение отвечаем
+    :param message:
+    :param bot:
+    :return:
+    """
     logging.info(f'command_info')
     await rq.check_chat_user(message)  # Проверяем если ли юзер в БД, если нет добавляем его
     if not message.reply_to_message:
@@ -41,6 +48,14 @@ async def command_info(message: Message, bot: Bot):
 @router.message(IsGroup(),
                 Command('info_top', prefix='!'))
 async def command_info_top(message: Message, command: CommandObject, bot: Bot):
+    """
+    Выводит список количества репутации у пользователей в порядке убывания, если передать через пробел число,
+     то список ограничится только этим числом
+    :param message:
+    :param command:
+    :param bot:
+    :return:
+    """
     logging.info(f'command_info_top')
     if not command.args:
         top = 10

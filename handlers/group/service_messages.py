@@ -11,6 +11,7 @@ import datetime
 router = Router()
 config: Config = load_config()
 
+
 @router.chat_member(F.new_chat_member)
 async def on_user_join(event: ChatMemberUpdated, bot: Bot):
     logging.info(f'on_user_join {event.new_chat_member.status} {event}')
@@ -26,7 +27,7 @@ async def on_user_join(event: ChatMemberUpdated, bot: Bot):
                             last_rep_boost=datetime.datetime.now() - datetime.timedelta(hours=4),
                             last_help_boost=datetime.datetime.now() - datetime.timedelta(hours=4))
         await bot.send_message(chat_id=config.tg_bot.general_group,
-                               text=f'Привет  {event.new_chat_member.user.full_name},'
+                               text=f'Привет  @{event.new_chat_member.user.username},'
                                     f' почитай <a href="https://t.me/c/1327075982/69073/69075">правила группы</a>!',
                                message_thread_id=67828)
     elif event.new_chat_member.status == 'left':

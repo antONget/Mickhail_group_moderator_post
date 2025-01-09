@@ -16,6 +16,12 @@ router = Router()
 @router.message(IsGroup(),
                 F.text.endswith('rep'))
 async def check_messages(message: Message, bot: Bot):
+    """
+    Увеличение/уменьшение репутации пользователю на чье сообщение ответили
+    :param message:
+    :param bot:
+    :return:
+    """
     logging.info(f'check_messages')
     await rq.check_chat_user(message)  # Проверяем если ли юзер в БД, если нет добавляем его
     if message.html_text == '+rep':
