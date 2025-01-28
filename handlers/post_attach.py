@@ -69,7 +69,7 @@ async def link_resource(message: Message, bot: Bot, state: FSMContext) -> None:
     text_button = data['text_button']
     url_button = data['url_button']
     link_resource = message.text  # https://t.me/1327075982/143638
-    chat_id = ''.join(link_resource.split('/')[:-1])
+    chat_id = link_resource.split('/')[-2]
     message_thread_id = int(link_resource.split('/')[-1])
     button_1 = InlineKeyboardButton(text=text_button, url=url_button)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[button_1]])
