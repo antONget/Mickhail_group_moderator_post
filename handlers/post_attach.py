@@ -18,6 +18,8 @@ router.message.filter(F.chat.type == "private")
 class Attach(StatesGroup):
     post_text = State()
     post_button = State()
+    url_button = State()
+    link_resource = State()
 
 
 @router.message(F.text == '/post_attach')
@@ -41,15 +43,37 @@ async def post_text(message: Message, bot: Bot, state: FSMContext) -> None:
 @error_handler
 async def post_button(message: Message, bot: Bot, state: FSMContext) -> None:
     logging.info('post_button')
+    await message.answer(text='Пришлите ссылку для кнопки')
+    await state.set_state(Attach.url_button)
+    await state.update_data(text_button=message.text)
+
+
+@router.message(F.text, StateFilter(Attach.url_button))
+@error_handler
+async def post_url(message: Message, bot: Bot, state: FSMContext) -> None:
+    logging.info('post_url')
+    await message.answer(text='Пришлите ссылку на ресурс для размещения поста,'
+                              ' бот обязательно должен быть в нем админом')
+    await state.set_state(Attach.link_resource)
+    await state.update_data(url_button=message.text)
+
+
+@router.message(F.text, StateFilter(Attach.link_resource))
+@error_handler
+async def link_resource(message: Message, bot: Bot, state: FSMContext) -> None:
+    logging.info('link_resource')
     await message.answer(text='Пост размещен в топиках группы')
     await state.set_state(state=None)
-    await state.update_data(post_button=message.text)
-    groups = await rq.get_groups()
     data = await state.get_data()
-    button_1 = InlineKeyboardButton(text=message.text, url='https://t.me/MyderatorGroupsBot')
+    post_text = data['post_text']
+    text_button = data['text_button']
+    url_button = data['url_button']
+    link_resource = message.text  # https://t.me/1327075982/143638
+    chat_id = ''.join(link_resource.split('/')[:-1])
+    message_thread_id = int(link_resource.split('/')[-1])
+    button_1 = InlineKeyboardButton(text=text_button, url=url_button)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[button_1]])
-    for group in groups:
-        await bot.send_message(chat_id=config.tg_bot.general_group,
-                               text=data['post_text'],
-                               reply_markup=keyboard,
-                               message_thread_id=group.peer_id_test)
+    await bot.send_message(chat_id=chat_id,
+                           text=post_text,
+                           reply_markup=keyboard,
+                           message_thread_id=message_thread_id)
