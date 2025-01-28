@@ -73,7 +73,7 @@ async def link_resource(message: Message, bot: Bot, state: FSMContext) -> None:
     message_thread_id = int(link_resource.split('/')[-1])
     button_1 = InlineKeyboardButton(text=text_button, url=url_button)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[button_1]])
-    await bot.send_message(chat_id=chat_id,
+    await bot.send_message(chat_id=config.tg_bot.general_group,
                            text=post_text,
                            reply_markup=keyboard,
                            message_thread_id=message_thread_id)
