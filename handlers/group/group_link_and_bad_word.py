@@ -145,7 +145,7 @@ async def check_messages(message_reaction: MessageReactionUpdated, bot: Bot):
                 msg = await bot.send_message(chat_id=message_reaction.chat.id,
                                              text=f'👤 Пользователь {chat_user.first_name} {chat_user.last_name}'
                                                   f' (репутация {helping_user.total_help}) '
-                                                  f'помог пользователю {message_reaction.user.full_name} и '
+                                                  f'помог в ЧАТЕ и '
                                                   f'заработал +1 к своей репе',
                                              message_thread_id=message_id.message_thread_id)
                 await asyncio.sleep(1 * 60)
