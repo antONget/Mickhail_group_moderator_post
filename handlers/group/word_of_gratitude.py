@@ -39,7 +39,7 @@ async def word_of_gradit(message: Message, text_: list):
                     msg = await message.reply(f'👤 Пользователь {message.reply_to_message.from_user.full_name}'
                                               f' (репутация {helping_user.total_help}) '
                                               f'помог в ЧАТЕ и '
-                                              f'заработал +1 к своей репе')
+                                              f'заработал +1 к своему общему рейтингу')
                     await asyncio.sleep(1 * 60)
                     await msg.delete()
                     # else:
