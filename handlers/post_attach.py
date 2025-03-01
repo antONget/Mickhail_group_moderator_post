@@ -26,7 +26,7 @@ class Attach(StatesGroup):
 @error_handler
 async def post_attach(message: Message, bot: Bot, state: FSMContext) -> None:
     logging.info('post_attach')
-    await message.answer(text='Пришлите текст для поста ')
+    await message.answer(text='Пришлите текст для поста, например: <code>Разместите материал с помощью бота</code>')
     await state.set_state(Attach.post_text)
 
 
@@ -34,7 +34,7 @@ async def post_attach(message: Message, bot: Bot, state: FSMContext) -> None:
 @error_handler
 async def post_text(message: Message, bot: Bot, state: FSMContext) -> None:
     logging.info('post_text')
-    await message.answer(text='Пришлите текст для кнопки')
+    await message.answer(text='Пришлите текст для кнопки, например: <code>РАЗМЕСТИТЬ</code>')
     await state.set_state(Attach.post_button)
     await state.update_data(post_text=message.text)
 
@@ -43,7 +43,8 @@ async def post_text(message: Message, bot: Bot, state: FSMContext) -> None:
 @error_handler
 async def post_button(message: Message, bot: Bot, state: FSMContext) -> None:
     logging.info('post_button')
-    await message.answer(text='Пришлите ссылку для кнопки')
+    await message.answer(text=f'Пришлите ссылку для кнопки, например:'
+                              f' <code>https://t.me/MyderatorGroupsBot?start</code>')
     await state.set_state(Attach.url_button)
     await state.update_data(text_button=message.text)
 
@@ -53,7 +54,8 @@ async def post_button(message: Message, bot: Bot, state: FSMContext) -> None:
 async def post_url(message: Message, bot: Bot, state: FSMContext) -> None:
     logging.info('post_url')
     await message.answer(text='Пришлите ссылку на ресурс для размещения поста,'
-                              ' бот обязательно должен быть в нем админом')
+                              ' бот обязательно должен быть в нем админом, например:'
+                              ' <code>https://t.me/c/1327075982/84907</code>')
     await state.set_state(Attach.link_resource)
     await state.update_data(url_button=message.text)
 
@@ -71,9 +73,12 @@ async def link_resource(message: Message, bot: Bot, state: FSMContext) -> None:
     link_resource = message.text  # https://t.me/1327075982/143638
     chat_id = link_resource.split('/')[-2]
     message_thread_id = int(link_resource.split('/')[-1])
-    button_1 = InlineKeyboardButton(text=text_button, url=url_button)
+    button_1 = InlineKeyboardButton(text=text_button,
+                                    url=url_button)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[button_1]])
-    await bot.send_message(chat_id=config.tg_bot.general_group,
-                           text=post_text,
-                           reply_markup=keyboard,
-                           message_thread_id=message_thread_id)
+    msg = await bot.send_message(chat_id=config.tg_bot.general_group,
+                                 text=post_text,
+                                 reply_markup=keyboard,
+                                 message_thread_id=message_thread_id)
+    await bot.pin_chat_message(chat_id=config.tg_bot.general_group,
+                               message_id=msg.message_id)
