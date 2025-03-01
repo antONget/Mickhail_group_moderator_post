@@ -80,10 +80,13 @@ async def manager_oreders(callback: CallbackQuery, state: FSMContext, bot: Bot):
                 await callback.message.answer_media_group(media=media_group)
                 # информация о создателе заявки
                 user_order: User = await rq.get_user(tg_id=order.create_tg_id)
-                print(order.create_tg_id)
+                # print(order.create_tg_id)
                 # отправляем информацию о заказчике
-                await callback.message.answer(text=f'Получена заявка от <a href="tg://user?id={user_order.username}">{user_order.username}</a> для размещения в разделе: <i>{order.type_order}</i>.\n'
-                                                   f'Вы можете отправить пост на публикацию или отменить публикацию заявки'
+                await callback.message.answer(text=f'Получена заявка от <a href="tg://user?id={user_order.username}">'
+                                                   f'{user_order.username}</a> для размещения в разделе:'
+                                                   f' <i>{order.type_order}</i>.\n'
+                                                   f'Вы можете отправить пост на публикацию или отменить публикацию'
+                                                   f' заявки'
                                                    f'указав причину отказа',
                                               reply_markup=kb.keyboard_publish(id_order=order.id))
             # иначе информируем что заявок нет
@@ -245,7 +248,8 @@ async def recursion_publish(message: Message):
         await message.answer_media_group(media=media_group)
         user_order: User = await rq.get_user(tg_id=order.create_tg_id)
         await message.answer(
-            text=f'Получена заявка от <a href="tg://user?id={user_order.username}">{user_order.username}</a> для размещения в разделе: <i>{order.type_order}</i>.\n'
+            text=f'Получена заявка от <a href="tg://user?id={user_order.username}">{user_order.username}'
+                 f'</a> для размещения в разделе: <i>{order.type_order}</i>.\n'
                  f'Вы можете отправить пост на публикацию или отменить публикацию заявки'
                  f'указав причину отказа',
             reply_markup=kb.keyboard_publish(id_order=order.id))

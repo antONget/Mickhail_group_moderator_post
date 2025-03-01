@@ -4,9 +4,10 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMar
 def keyboard_main_button() -> ReplyKeyboardMarkup:
     button_1 = KeyboardButton(text='Частное объявление')
     button_2 = KeyboardButton(text='Коммерческое объявление')
+    button_6 = KeyboardButton(text='Комментарии по софту и обзоры скриптов')
     button_3 = KeyboardButton(text='Услуги')
     button_4 = KeyboardButton(text='Удалить публикацию')
-    keyboard = ReplyKeyboardMarkup(keyboard=[[button_1], [button_2], [button_3], [button_4]],
+    keyboard = ReplyKeyboardMarkup(keyboard=[[button_1], [button_2], [button_6], [button_3], [button_4]],
                                    resize_keyboard=True)
     return keyboard
 
@@ -14,10 +15,11 @@ def keyboard_main_button() -> ReplyKeyboardMarkup:
 def keyboard_main_manager() -> ReplyKeyboardMarkup:
     button_1 = KeyboardButton(text='Частное объявление')
     button_2 = KeyboardButton(text='Коммерческое объявление')
+    button_6 = KeyboardButton(text='Комментарии по софту и обзоры скриптов')
     button_3 = KeyboardButton(text='Услуги')
     button_5 = KeyboardButton(text='Удалить публикацию')
     button_4 = KeyboardButton(text='Заявки')
-    keyboard = ReplyKeyboardMarkup(keyboard=[[button_1], [button_2], [button_3], [button_5], [button_4]],
+    keyboard = ReplyKeyboardMarkup(keyboard=[[button_1], [button_2], [button_6], [button_3], [button_5], [button_4]],
                                    resize_keyboard=True)
     return keyboard
 

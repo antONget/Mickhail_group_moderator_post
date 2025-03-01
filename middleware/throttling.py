@@ -16,7 +16,7 @@ class ThrottlingMiddleware(BaseMiddleware):
             data: Dict[str, Any],
     ) -> Any:
         user: User = data.get('event_from_user')
-
+        
         if user.id in CACHE:
             return
 
