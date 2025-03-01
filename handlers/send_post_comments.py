@@ -338,12 +338,14 @@ async def get_photo(callback: CallbackQuery, state: FSMContext, bot: Bot):
     #         else:
     #             media_group.append(InputMediaPhoto(media=photo))
     media_group, caption = await collecting_content(state=state)
+    group_peer_id = -1001327075982
+    message_thread_id = 84907
     if media_group:
-        await bot.send_media_group(chat_id=-1002291300776,
+        await bot.send_media_group(chat_id=group_peer_id,
                                    media=media_group,
-                                   message_thread_id=1087)
+                                   message_thread_id=message_thread_id)
     else:
-        await bot.send_message(chat_id=-1002291300776,
+        await bot.send_message(chat_id=group_peer_id,
                                text=caption,
-                               message_thread_id=1087)
+                               message_thread_id=message_thread_id)
     await callback.message.edit_text(text=f'Ваши материалы опубликованы')
