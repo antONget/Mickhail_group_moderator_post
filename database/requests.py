@@ -454,6 +454,13 @@ async def select_chat_actions_top() -> list[ChatUser]:
 
 
 async def update_message_id(tg_id: int, message_id: int, message_thread_id: int) -> None:
+    """
+    Обновление списка сообщений от пользователя для отправки реакций
+    :param tg_id:
+    :param message_id:
+    :param message_thread_id:
+    :return:
+    """
     logging.info(f'update_message_id')
     async with async_session() as session:
         messages = await session.scalars(select(MessageId).where(MessageId.tg_id == tg_id))
@@ -466,6 +473,11 @@ async def update_message_id(tg_id: int, message_id: int, message_thread_id: int)
 
 
 async def select_message_id(message_id: int) -> MessageId:
+    """
+    Получаем информацию об отправителе сообщения
+    :param message_id:
+    :return:
+    """
     logging.info(f'select_message_id')
     async with async_session() as session:
         return await session.scalar(select(MessageId).where(MessageId.message_id == message_id))

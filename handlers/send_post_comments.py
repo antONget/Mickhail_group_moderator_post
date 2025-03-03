@@ -31,7 +31,7 @@ class PostComment(StatesGroup):
     photo_state = State()
 
 
-async def collecting_content(state: FSMContext):
+async def collecting_content(state: FSMContext, user_tg_id: int) -> (list, str):
     data = await state.get_data()
     model = data.get('model', '')
     year = data.get('year', '')
@@ -57,7 +57,8 @@ async def collecting_content(state: FSMContext):
     if note:
         note = f'<b><u>Примечание:</u></b> {note}\n'
     content_list = data.get('content', [])
-    caption = f'{model}{ebu}{script}{sn}{method}{note}'
+    caption = f'{model}{ebu}{script}{sn}{method}{note}\n' \
+              f'Материалы опубликованы<a href="tg://user?id={user_tg_id}">пользователем</a>'
     media_group = []
     if content_list:
         i = 0
@@ -219,7 +220,7 @@ async def get_note(message: Message, bot: Bot, state: FSMContext):
     else:
         await state.update_data(note=message.text)
         await message.delete()
-        media_group, caption = await collecting_content(state=state)
+        media_group, caption = await collecting_content(state=state, user_tg_id=message.from_user.id)
         if media_group:
             await message.answer_media_group(media=media_group)
         else:
@@ -241,7 +242,7 @@ async def request_content_photo(message: Message, state: FSMContext, bot: Bot):
     count.append(content)
     await state.update_data(content=list_content)
     await state.update_data(count=count)
-    media_group, caption = await collecting_content(state=state)
+    media_group, caption = await collecting_content(state=state, user_tg_id=message.from_user.id)
     if media_group:
         await message.answer_media_group(media=media_group)
     else:
@@ -290,7 +291,7 @@ async def pass_add_content(callback: CallbackQuery, state: FSMContext, bot: Bot)
     elif state_ == PostComment.note_state:
         await state.update_data(note_state='')
         await callback.message.delete()
-        media_group, caption = await collecting_content(state=state)
+        media_group, caption = await collecting_content(state=state, user_tg_id=callback.from_user.id)
         if media_group:
             await callback.message.answer_media_group(media=media_group)
         else:
@@ -341,11 +342,17 @@ async def get_photo(callback: CallbackQuery, state: FSMContext, bot: Bot):
     group_peer_id = -1001327075982
     message_thread_id = 84907
     if media_group:
-        await bot.send_media_group(chat_id=group_peer_id,
-                                   media=media_group,
+        message_post = await bot.send_media_group(chat_id=group_peer_id,
+                                                  media=media_group,
+                                                  message_thread_id=message_thread_id)
+        await rq.update_message_id(tg_id=callback.from_user.id,
+                                   message_id=message_post[0].message_id,
                                    message_thread_id=message_thread_id)
     else:
-        await bot.send_message(chat_id=group_peer_id,
-                               text=caption,
-                               message_thread_id=message_thread_id)
+        message_post = await bot.send_message(chat_id=group_peer_id,
+                                              text=caption,
+                                              message_thread_id=message_thread_id)
+        await rq.update_message_id(tg_id=callback.from_user.id,
+                                   message_id=message_post.message_id,
+                                   message_thread_id=message_thread_id)
     await callback.message.edit_text(text=f'Ваши материалы опубликованы')
