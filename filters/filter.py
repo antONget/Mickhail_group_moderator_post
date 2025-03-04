@@ -66,3 +66,7 @@ def validate_text_latin(text: str):
     # Проверка соответствия паттерну
     match = pattern.match(text)
     return bool(match)
+
+
+if __name__ == "__main__":
+    print(validate_text_latin('Ford Focus'))
