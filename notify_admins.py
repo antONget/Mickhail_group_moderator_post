@@ -13,7 +13,7 @@ async def on_startup_notify(bot: Bot):
     logging.info('on_startup_notify')
     date_now = time.strftime("%Y-%m-%d", time.localtime())
     time_now = time.strftime("%H:%M:%S", time.localtime())
-    for admin in config.tg_bot.admin_ids.split(','):
+    for admin in [config.tg_bot.support_id]:
         if admin:
             try:
                 text = (f"✅Бот запущен и готов к работе!✅\n"
