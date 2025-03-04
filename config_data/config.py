@@ -17,7 +17,7 @@ class TgBot:
     time_of_rep: int
     banned_messages: list
     words_of_gratitude: list
-
+    comment_topic: int
 
 @dataclass
 class Config:
@@ -39,7 +39,8 @@ def load_config(path: str = None) -> Config:
                                time_of_help=env('TIME_OF_HELP'),
                                time_of_rep=env('TIME_OF_REP'),
                                banned_messages=banned_messages,
-                               words_of_gratitude=words_of_gratitude))
+                               words_of_gratitude=words_of_gratitude,
+                               comment_topic=env('COMMENT_TOPIC')))
 
 
 banned_messages = [

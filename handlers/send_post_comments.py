@@ -58,7 +58,7 @@ async def collecting_content(state: FSMContext, user_tg_id: int) -> (list, str):
         note = f'<b><u>Примечание:</u></b> {note}\n'
     content_list = data.get('content', [])
     caption = f'{model}{ebu}{script}{sn}{method}{note}\n' \
-              f'Материалы опубликованы<a href="tg://user?id={user_tg_id}">пользователем</a>'
+              f'Материалы опубликованы <a href="tg://user?id={user_tg_id}">пользователем</a>'
     media_group = []
     if content_list:
         i = 0
@@ -338,9 +338,9 @@ async def get_photo(callback: CallbackQuery, state: FSMContext, bot: Bot):
     #             media_group.append(InputMediaPhoto(media=photo, caption=caption))
     #         else:
     #             media_group.append(InputMediaPhoto(media=photo))
-    media_group, caption = await collecting_content(state=state)
-    group_peer_id = -1001327075982
-    message_thread_id = 84907
+    media_group, caption = await collecting_content(state=state, user_tg_id=callback.from_user.id)
+    group_peer_id = config.tg_bot.general_group
+    message_thread_id = config.tg_bot.comment_topic
     if media_group:
         message_post = await bot.send_media_group(chat_id=group_peer_id,
                                                   media=media_group,

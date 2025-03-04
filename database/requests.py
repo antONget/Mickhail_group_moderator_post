@@ -29,6 +29,11 @@ async def add_chat_user(tg_id: int, first_name: str, last_name: str, user_name: 
 
 # Получаем чат юзера
 async def select_chat_user(tg_id: int) -> ChatUser:
+    """
+    Получаем информацию о сообщениях от пользователя
+    :param tg_id:
+    :return:
+    """
     logging.info(f'select_chat_user')
     async with async_session() as session:
         return await session.scalar(select(ChatUser).where(ChatUser.tg_id == tg_id))
@@ -205,6 +210,7 @@ async def check_violations(message: Message, bot: Bot, word_bad: str = "***"):
     Действия с нарушениями
     :param message:
     :param bot:
+    :param word_bad:
     :return:
     """
     logging.info(f'update_last_rep_boost')
