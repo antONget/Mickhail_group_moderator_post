@@ -62,7 +62,7 @@ def validate_text_latin(text: str):
     :return:
     """
     logging.info('validate_text_latin')
-    pattern = re.compile(r'^[a-zA-Z0-9]+$')
+    pattern = re.compile(r'^[A-Za-z0-9 ]*$')
     # Проверка соответствия паттерну
     match = pattern.match(text)
     return bool(match)
