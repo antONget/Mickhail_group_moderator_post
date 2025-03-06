@@ -21,7 +21,9 @@ def keyboard_ebu() -> InlineKeyboardMarkup:
     button_3 = InlineKeyboardButton(text='ECM', callback_data='ebu_ECM')
     button_4 = InlineKeyboardButton(text='ВCM', callback_data='ebu_ВCM')
     button_5 = InlineKeyboardButton(text='IMMO', callback_data='ebu_IMMO')
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[[button_1], [button_2], [button_3], [button_4], [button_5]])
+    button_6 = InlineKeyboardButton(text='CAR MUSIK', callback_data='ebu_CAR MUSIK')
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[[button_1], [button_2], [button_3], [button_4], [button_5],
+                                                     [button_6]])
     return keyboard
 
 
