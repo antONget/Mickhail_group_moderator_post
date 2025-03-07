@@ -57,8 +57,11 @@ async def collecting_content(state: FSMContext, user_tg_id: int) -> (list, str):
     if note:
         note = f'<b><u>Примечание:</u></b> {note}\n'
     content_list = data.get('content', [])
-    caption = f'{model}{ebu}{script}{sn}{method}{note}\n' \
-              f'Материалы опубликованы <a href="tg://user?id={user_tg_id}">пользователем</a>'
+    user_info: User = await rq.get_user(tg_id=user_tg_id)
+    autor = f'Материалы опубликованы пользователем <a href="tg://user?id={user_tg_id}">{user_info.username}</a>'
+    if user_info.username == 'USER':
+        autor = f'Для связи с автором поста перейдите по <a href="tg://user?id={user_tg_id}">ссылке</a>'
+    caption = f'{model}{ebu}{script}{sn}{method}{note}\n{autor}'
     media_group = []
     if content_list:
         i = 0
